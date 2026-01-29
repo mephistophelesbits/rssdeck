@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Build the prompt for a global briefing
-        const prompt = `You are a news analyst. Create a high-level "Morning Briefing" based on the following headlines from multiple sources.
+        const prompt = `You are a news analyst. Create a high-level briefing based on the following headlines from multiple sources.
 Group them logically by topic. 
 Be concise but informative. 
 Use a friendly but professional tone (like J.A.R.V.I.S.).
@@ -42,8 +42,20 @@ Briefing:`;
         if (telegramSettings?.enabled && telegramSettings.token && telegramSettings.chatId) {
             const telegramUrl = `https://api.telegram.org/bot${telegramSettings.token}/sendMessage`;
 
-            // Use Markdown formatting
-            const text = `🌅 *MORNING BRIEFING*\n\n${briefing}`;
+            // Use Markdown formatting - Dynamic title based on time or generic
+            const hour = new Date().getHours();
+            let greeting = '🌅';
+            let title = 'DAILY BRIEFING';
+            
+            if (hour >= 12 && hour < 17) {
+                greeting = '☀️';
+                title = 'AFTERNOON BRIEFING';
+            } else if (hour >= 17 || hour < 5) {
+                greeting = '🌙';
+                title = 'EVENING BRIEFING';
+            }
+            
+            const text = `${greeting} *${title}*\n\n${briefing}`;
 
             try {
                 const res = await fetch(telegramUrl, {

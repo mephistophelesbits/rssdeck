@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  rss-deck:
+    container_name: rss-deck
+    build: .
+    image: rss-deck:latest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production

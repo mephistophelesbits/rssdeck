@@ -953,9 +953,9 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
           {scrapedContent ? (
             <div
               onClick={handleContentClick}
-              className="prose prose-invert max-w-none
+              className="prose dark:prose-invert max-w-none
                 prose-headings:text-foreground prose-headings:font-semibold
-                prose-p:text-foreground-secondary prose-p:leading-relaxed
+                prose-p:text-foreground prose-p:leading-relaxed
                 prose-a:text-accent prose-a:no-underline hover:prose-a:underline
                 prose-strong:text-foreground
                 prose-blockquote:border-l-accent prose-blockquote:text-foreground-secondary
@@ -967,9 +967,9 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
           ) : sanitizedContent ? (
             <div
               onClick={handleContentClick}
-              className="prose prose-invert max-w-none
+              className="prose dark:prose-invert max-w-none
                 prose-headings:text-foreground prose-headings:font-semibold
-                prose-p:text-foreground-secondary prose-p:leading-relaxed
+                prose-p:text-foreground prose-p:leading-relaxed
                 prose-a:text-accent prose-a:no-underline hover:prose-a:underline
                 prose-strong:text-foreground
                 prose-blockquote:border-l-accent prose-blockquote:text-foreground-secondary

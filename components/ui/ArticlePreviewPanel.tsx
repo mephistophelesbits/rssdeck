@@ -7,7 +7,7 @@ import DOMPurify from 'dompurify';
 import ReactMarkdown from 'react-markdown';
 import { Article } from '@/lib/types';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
-import { useSettingsStore } from '@/lib/settings-store';
+import { useSettingsStore, getThemeById } from '@/lib/settings-store';
 import { useArticlesStore } from '@/lib/articles-store';
 import { useArticleCacheStore } from '@/lib/article-cache-store';
 import { useUrlPreview } from '@/components/ui/UrlPreviewPopup';
@@ -47,6 +47,8 @@ type SummaryPhase = 'idle' | 'scraping' | 'finding-related' | 'searching-web' | 
 export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelProps) {
   const { isBookmarked, toggleBookmark } = useBookmarksStore();
   const aiSettings = useSettingsStore((state) => state.aiSettings);
+  const themeId = useSettingsStore((state) => state.themeId);
+  const isDark = getThemeById(themeId).isDark;
   const articlesByColumn = useArticlesStore((state) => state.articlesByColumn);
   const { openPreview } = useUrlPreview();
 
@@ -953,29 +955,19 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
           {scrapedContent ? (
             <div
               onClick={handleContentClick}
-              className="prose dark:prose-invert max-w-none
-                prose-headings:text-foreground prose-headings:font-semibold
-                prose-p:text-foreground prose-p:leading-relaxed
-                prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-foreground
-                prose-blockquote:border-l-accent prose-blockquote:text-foreground-secondary
-                prose-code:text-accent prose-code:bg-background-tertiary prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-                prose-pre:bg-background-tertiary
-                prose-img:rounded-lg prose-img:max-w-full"
+              className={cn(
+                "prose max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-p:text-foreground prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-blockquote:border-l-accent prose-blockquote:text-foreground-secondary prose-code:text-accent prose-code:bg-background-tertiary prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-background-tertiary prose-img:rounded-lg prose-img:max-w-full",
+                isDark && "prose-invert"
+              )}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(scrapedContent.content) }}
             />
           ) : sanitizedContent ? (
             <div
               onClick={handleContentClick}
-              className="prose dark:prose-invert max-w-none
-                prose-headings:text-foreground prose-headings:font-semibold
-                prose-p:text-foreground prose-p:leading-relaxed
-                prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-                prose-strong:text-foreground
-                prose-blockquote:border-l-accent prose-blockquote:text-foreground-secondary
-                prose-code:text-accent prose-code:bg-background-tertiary prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
-                prose-pre:bg-background-tertiary
-                prose-img:rounded-lg prose-img:max-w-full"
+              className={cn(
+                "prose max-w-none prose-headings:text-foreground prose-headings:font-semibold prose-p:text-foreground prose-p:leading-relaxed prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-blockquote:border-l-accent prose-blockquote:text-foreground-secondary prose-code:text-accent prose-code:bg-background-tertiary prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-background-tertiary prose-img:rounded-lg prose-img:max-w-full",
+                isDark && "prose-invert"
+              )}
               dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />
           ) : article.contentSnippet ? (

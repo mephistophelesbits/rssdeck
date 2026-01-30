@@ -12,6 +12,7 @@ export interface ThemeColors {
   accent: string;
   accentHover: string;
   border: string;
+  isDark: boolean;
 }
 
 export const themes: ThemeColors[] = [
@@ -26,6 +27,7 @@ export const themes: ThemeColors[] = [
     accent: '#44403c', // Warm charcoal/brownish
     accentHover: '#292524',
     border: '#d6d3cd',
+    isDark: false,
   },
   {
     id: 'dark-blue',
@@ -38,6 +40,7 @@ export const themes: ThemeColors[] = [
     accent: '#1d9bf0',
     accentHover: '#1a8cd8',
     border: '#38444d',
+    isDark: true,
   },
   {
     id: 'ebook',
@@ -50,6 +53,7 @@ export const themes: ThemeColors[] = [
     accent: '#2c5f85',
     accentHover: '#4a86b0',
     border: '#cec9be',
+    isDark: false,
   },
   {
     id: 'cyberpunk',
@@ -62,6 +66,7 @@ export const themes: ThemeColors[] = [
     accent: '#fcee0a',
     accentHover: '#00f0ff',
     border: '#333333',
+    isDark: true,
   },
   {
     id: 'cute',
@@ -74,6 +79,7 @@ export const themes: ThemeColors[] = [
     accent: '#ff80ab',
     accentHover: '#8c9eff',
     border: '#ffc0cb',
+    isDark: false,
   },
   {
     id: 'hacker',
@@ -86,6 +92,7 @@ export const themes: ThemeColors[] = [
     accent: '#ccffcc',
     accentHover: '#ffffff',
     border: '#003b05',
+    isDark: true,
   },
   {
     id: 'ironman',
@@ -98,6 +105,7 @@ export const themes: ThemeColors[] = [
     accent: '#ffb800',
     accentHover: '#ffd600',
     border: '#00d2ff44',
+    isDark: true,
   },
   {
     id: 'ironman-hud',
@@ -110,6 +118,7 @@ export const themes: ThemeColors[] = [
     accent: '#ff3d00',
     accentHover: '#ff6e40',
     border: '#ff3d0044',
+    isDark: true,
   },
 ];
 

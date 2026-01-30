@@ -23,6 +23,13 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     root.style.setProperty('--accent-hover', theme.accentHover);
     root.style.setProperty('--border', theme.border);
     root.setAttribute('data-theme', themeId);
+
+    // Manage dark mode class for Tailwind
+    if (theme.isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
   }, [themeId]);
 
   return <>{children}</>;

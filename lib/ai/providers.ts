@@ -136,7 +136,7 @@ async function generateAnthropic(prompt: string, options: AIRequestOptions): Pro
 async function generateGemini(prompt: string, options: AIRequestOptions): Promise<AIResponse> {
     if (!options.apiKey) throw new Error('Gemini API key is required');
 
-    const model = options.model || 'gemini-1.5-flash';
+    const model = options.model || 'gemini-2.0-flash';
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${options.apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -279,7 +279,7 @@ async function generateChatAnthropic(messages: AIChatMessage[], options: AIReque
 async function generateChatGemini(messages: AIChatMessage[], options: AIRequestOptions): Promise<AIResponse> {
     if (!options.apiKey) throw new Error('Gemini API key is required');
 
-    const model = options.model || 'gemini-1.5-flash';
+    const model = options.model || 'gemini-2.0-flash';
 
     // Convert OpenAI-style messages to Gemini style
     const contents = messages.filter(m => m.role !== 'system').map(m => ({

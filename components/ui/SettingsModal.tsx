@@ -272,7 +272,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       model: e.target.value === 'ollama' ? 'llama3.2' :
                         e.target.value === 'openai' ? 'gpt-4o-mini' :
                           e.target.value === 'anthropic' ? 'claude-3-5-sonnet-20240620' :
-                            'gemini-1.5-flash'
+                            'gemini-2.0-flash'
                     })}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none"
                   >

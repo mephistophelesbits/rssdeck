@@ -2,6 +2,8 @@
 
 A modern, multi-column RSS reader with local AI integration for summarizing, sentiment analysis, and chatting with articles.
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-%F0%9F%A4%9D-yellow)](https://buymeacoffee.com/kianfongl)
+
 ![RSS Deck Screenshot](docs/screenshot.png)
 
 ## ✨ Features
@@ -146,4 +148,6 @@ MIT License - feel free to use, modify, and share.
 
 **Built with 💻 and 🤖 by Wong Kian Fong**
 
-If this project inspires you, [give it a ⭐ on GitHub](https://github.com/YOUR_USERNAME/rss-deck)!
+If this project inspires you, [give it a ⭐ on GitHub](https://github.com/mephistophelesbits/rssdeck)!
+
+☕ **[Buy me a coffee](https://buymeacoffee.com/kianfongl)** — Support vibe coding and open source tools

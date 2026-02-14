@@ -3,6 +3,7 @@
 A modern, multi-column RSS reader with local AI integration for summarizing, sentiment analysis, and chatting with articles.
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-%F0%9F%A4%9D-yellow)](https://buymeacoffee.com/kianfongl)
+[![Docker Image](https://img.shields.io/badge/Docker-mephistophelesbits%2Frssdeck-blue)](https://hub.docker.com/r/mephistophelesbits/rssdeck)
 
 ![RSS Deck Screenshot](docs/screenshot.png)
 
@@ -51,11 +52,23 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-### Docker Deployment
+### Docker Deployment (Pre-built Image)
 
 ```bash
-# Build and run with Docker Compose
+# Pull and run the latest image
+docker pull mephistophelesbits/rssdeck:latest
 docker-compose up -d
+
+# Access at http://localhost:3000
+```
+
+### Docker Deployment (Build Locally)
+
+```bash
+# Clone and build locally
+git clone https://github.com/mephistophelesbits/rssdeck.git
+cd rssdeck
+docker-compose up -d --build
 
 # Access at http://localhost:3000
 ```

@@ -164,3 +164,4 @@ MIT License - feel free to use, modify, and share.
 If this project inspires you, [give it a ⭐ on GitHub](https://github.com/mephistophelesbits/rssdeck)!
 
 ☕ **[Buy me a coffee](https://buymeacoffee.com/kianfongl)** — Support vibe coding and open source tools
+# Trigger build

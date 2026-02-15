@@ -55,8 +55,10 @@ npm run dev
 ### Docker Deployment (Pre-built Image)
 
 ```bash
-# Pull and run the latest image
-docker pull kianfong/rssdeck:latest
+# One-line deploy
+docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck kianfong/rssdeck:latest
+
+# Or with docker-compose
 docker-compose up -d
 
 # Access at http://localhost:3000
@@ -124,6 +126,17 @@ rss-deck/
 - **AI**: Ollama (local LLM)
 - **RSS**: Custom parser + Mozilla Readability
 - **Deployment**: Docker
+
+## 📋 Changelog
+
+### v1.1.0 (Feb 2026)
+- **OPML Import** - Bulk import feeds from Feedly, Inoreader, Google Reader
+- **Summary Caching** - Stable article IDs prevent re-summarizing
+- **Notification Rate Limiting** - 1-hour cooldown per article
+- **Telegram Briefings** - Daily AI-curated news delivered to Telegram
+- **Landing Page** - Product page at `/landing`
+- **Stock Ticker** - Real-time portfolio with AI trading signals
+- **8 Themes** - Including J.A.R.V.I.S., Matrix, Cyberpunk
 
 ## 📝 The Story Behind RSS Deck
 

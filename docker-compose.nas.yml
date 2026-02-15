@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  rss-deck:
+    image: rss-deck:latest
+    container_name: rss-deck
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3005:3000"  # Change 3005 to your preferred port
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Kuala_Lumpur
+    volumes:
+      - rss-deck-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Optional: Local AI (Ollama) for privacy
+# Uncomment to enable local AI summarization
+# ollama:
+#   image: ollama/ollama:latest
+#   container_name: rss-deck-ollama
+#   restart: unless-stopped
+#   ports:
+#     - "11434:11434"
+#   volumes:
+#     - ollama-data:/root/.ollama
+#   environment:
+#     - TZ=Asia/Kuala_Lumpur
+#   healthcheck:
+#     test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+#     interval: 60s
+#     timeout: 10s
+#     retries: 3
+
+volumes:
+  rss-deck-data:
+    driver: local
+
+# Optional volume for Ollama
+# ollama-data:
+#   driver: local
+
+networks:
+  default:
+    name: rss-deck-network

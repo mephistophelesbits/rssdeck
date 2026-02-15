@@ -52,8 +52,14 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Ensure URL has protocol
+  let fetchUrl = url;
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    fetchUrl = 'http://' + url;
+  }
+
   try {
-    const rssResponse = await fetch(url, {
+    const rssResponse = await fetch(fetchUrl, {
       headers: {
         'User-Agent': 'RSS-Deck/1.0 (RSS Reader Application)',
       },

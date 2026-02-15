@@ -238,6 +238,24 @@ export const categories: Category[] = [
       },
     ],
   },
+  {
+    id: 'audiophile',
+    name: 'Audiophile',
+    description: 'Headphones, IEMs, and audio gear discussions',
+    icon: '🎧',
+    feeds: [
+      {
+        id: 'headphones',
+        url: 'https://www.reddit.com/r/headphones/.rss',
+        title: 'r/headphones',
+      },
+      {
+        id: 'iems',
+        url: 'https://www.reddit.com/r/iems/.rss',
+        title: 'r/iems',
+      },
+    ],
+  },
 ];
 
 export function getCategoryById(id: string): Category | undefined {

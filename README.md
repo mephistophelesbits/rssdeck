@@ -54,17 +54,20 @@ npm run dev
 
 ### Docker Deployment (Pre-built Image)
 
+> [!NOTE]
+> The pre-built image is optimized for `amd64`. If you are on a **Mac with Apple Silicon (M1/M2/M3)**, we recommend [building locally](#docker-deployment-build-locally) for better performance.
+
 ```bash
-# One-line deploy
-docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck kianfong/rssdeck:latest
+# One-line deploy (Mac users may need --platform linux/amd64)
+docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck --platform linux/amd64 kianfong/rssdeck:latest
 
 # Or with docker-compose
 docker-compose up -d
-
-# Access at http://localhost:3000
 ```
 
 ### Docker Deployment (Build Locally)
+
+This is the **recommended method for Mac Apple Silicon** users to ensure native performance.
 
 ```bash
 # Clone and build locally
@@ -74,6 +77,12 @@ docker-compose up -d --build
 
 # Access at http://localhost:3000
 ```
+
+#### 🛡️ Troubleshooting Mac Docker Errors
+
+If you see `no matching manifest for linux/arm64/v8 in the manifest list entries`, it means you're trying to pull an `amd64` image on an `arm64` Mac. 
+
+**Solution:** Use the **Build Locally** method above, or add `--platform linux/amd64` to your `docker run` command.
 
 ### Ollama Setup
 

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { X, Loader2, Check, Link2, Folder, Plus, Columns, Trash2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Loader2, Check, Link2, Folder, Plus, Columns, Trash2, Upload, FileText } from 'lucide-react';
 import { useDeckStore, DEFAULT_COLUMN_WIDTH } from '@/lib/store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { categories, Category } from '@/lib/categories';
+import { parseOPML, isValidOPML, OPMLFeed } from '@/lib/opml';
 import { cn } from '@/lib/utils';
 
 interface AddFeedModalProps {
@@ -12,7 +13,7 @@ interface AddFeedModalProps {
   onClose: () => void;
 }
 
-type Tab = 'url' | 'categories';
+type Tab = 'url' | 'categories' | 'opml';
 type TargetType = 'new' | string; // 'new' or column ID
 
 export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
@@ -21,6 +22,12 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [targetColumn, setTargetColumn] = useState<TargetType>('new');
+
+  // OPML state
+  const [opmlFeeds, setOpmlFeeds] = useState<OPMLFeed[]>([]);
+  const [opmlError, setOpmlError] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const columns = useDeckStore((state) => state.columns);
   const addColumn = useDeckStore((state) => state.addColumn);
@@ -126,6 +133,108 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
     onClose();
   };
 
+  // OPML handlers
+  const handleOPMLFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setOpmlError(null);
+    setOpmlFeeds([]);
+
+    try {
+      const text = await file.text();
+
+      if (!isValidOPML(text)) {
+        setOpmlError('Invalid OPML file. Please check the format.');
+        return;
+      }
+
+      const result = parseOPML(text);
+
+      if (result.feeds.length === 0) {
+        setOpmlError('No RSS feeds found in this OPML file.');
+        return;
+      }
+
+      setOpmlFeeds(result.feeds);
+    } catch (err) {
+      setOpmlError('Failed to parse OPML file.');
+      console.error(err);
+    }
+  };
+
+  const handleImportOPML = () => {
+    if (opmlFeeds.length === 0) return;
+
+    setIsImporting(true);
+
+    if (targetColumn === 'new') {
+      addColumn({
+        id: crypto.randomUUID(),
+        title: 'Imported Feeds',
+        type: 'multi-feed',
+        sources: opmlFeeds.map((feed) => ({
+          id: crypto.randomUUID(),
+          url: feed.url,
+          title: feed.title,
+        })),
+        settings: {
+          refreshInterval: defaultRefreshInterval,
+          viewMode: defaultViewMode,
+        },
+        width: DEFAULT_COLUMN_WIDTH,
+      });
+    } else {
+      opmlFeeds.forEach((feed) => {
+        addFeedToColumn(targetColumn, {
+          id: crypto.randomUUID(),
+          url: feed.url,
+          title: feed.title,
+        });
+      });
+    }
+
+    setOpmlFeeds([]);
+    setOpmlError(null);
+    setTargetColumn('new');
+    onClose();
+  };
+
+  const handleImportAsColumns = () => {
+    if (opmlFeeds.length === 0) return;
+
+    setIsImporting(true);
+
+    const byCategory = new Map<string, OPMLFeed[]>();
+    opmlFeeds.forEach((feed) => {
+      const cat = feed.category || 'Imported';
+      if (!byCategory.has(cat)) byCategory.set(cat, []);
+      byCategory.get(cat)!.push(feed);
+    });
+
+    byCategory.forEach((feeds, category) => {
+      addColumn({
+        id: crypto.randomUUID(),
+        title: category,
+        type: 'multi-feed',
+        sources: feeds.map((feed) => ({
+          id: crypto.randomUUID(),
+          url: feed.url,
+          title: feed.title,
+        })),
+        settings: {
+          refreshInterval: defaultRefreshInterval,
+          viewMode: defaultViewMode,
+        },
+        width: DEFAULT_COLUMN_WIDTH,
+      });
+    });
+
+    setOpmlFeeds([]);
+    setOpmlError(null);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
@@ -209,11 +318,23 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
             <Link2 className="w-4 h-4" />
             Custom URL
           </button>
+          <button
+            onClick={() => setActiveTab('opml')}
+            className={cn(
+              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2',
+              activeTab === 'opml'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-foreground-secondary hover:text-foreground'
+            )}
+          >
+            <Upload className="w-4 h-4" />
+            OPML
+          </button>
         </div>
 
         {/* Content */}
         <div className="p-4 flex-1 overflow-y-auto">
-          {activeTab === 'categories' ? (
+          {activeTab === 'categories' && (
             <div className="grid grid-cols-2 gap-3">
               {categories.map((category) => (
                 <button
@@ -231,7 +352,9 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                 </button>
               ))}
             </div>
-          ) : (
+          )}
+
+          {activeTab === 'url' && (
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -306,6 +429,114 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
               <p className="text-xs text-foreground-secondary text-center mt-2">
                 Enter the URL of any RSS or Atom feed
               </p>
+            </div>
+          )}
+
+          {activeTab === 'opml' && (
+            <div className="space-y-4">
+              <div
+                className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-accent transition-colors cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".opml,.xml"
+                  onChange={handleOPMLFileChange}
+                  className="hidden"
+                />
+                <FileText className="w-10 h-10 mx-auto mb-3 text-foreground-secondary" />
+                <p className="text-sm font-medium mb-1">
+                  Drop your OPML file here
+                </p>
+                <p className="text-xs text-foreground-secondary mb-3">
+                  or click to browse
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm transition-colors"
+                >
+                  Select File
+                </button>
+              </div>
+
+              {opmlError && (
+                <p className="text-sm text-error text-center">{opmlError}</p>
+              )}
+
+              {opmlFeeds.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      Found {opmlFeeds.length} feeds
+                    </span>
+                    <button
+                      onClick={() => {
+                        setOpmlFeeds([]);
+                        setOpmlError(null);
+                      }}
+                      className="text-xs text-foreground-secondary hover:text-foreground"
+                    >
+                      Clear
+                    </button>
+                  </div>
+
+                  <div className="bg-background-tertiary rounded-lg p-3 space-y-2 max-h-[200px] overflow-y-auto">
+                    {opmlFeeds.slice(0, 10).map((feed, idx) => (
+                      <div key={idx} className="text-sm">
+                        <span className="font-medium">{feed.title}</span>
+                        {feed.category && (
+                          <span className="text-xs text-accent ml-2">({feed.category})</span>
+                        )}
+                        <span className="text-xs text-foreground-secondary block truncate">
+                          {feed.url}
+                        </span>
+                      </div>
+                    ))}
+                    {opmlFeeds.length > 10 && (
+                      <p className="text-xs text-foreground-secondary text-center py-2">
+                        ...and {opmlFeeds.length - 10} more
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleImportOPML}
+                      disabled={isImporting}
+                      className="flex-1 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isImporting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                      {targetColumn === 'new' ? 'Import as Column' : 'Add to Column'}
+                    </button>
+                    {targetColumn === 'new' && (
+                      <button
+                        onClick={handleImportAsColumns}
+                        disabled={isImporting}
+                        className="flex-1 py-2.5 border-2 border-accent hover:bg-accent-hover hover:text-white disabled:opacity-50 text-accent font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        {isImporting ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Columns className="w-4 h-4" />
+                        )}
+                        Import as Multiple Columns
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-foreground-secondary text-center">
+                    Choose to import all feeds into one column or create separate columns by category
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

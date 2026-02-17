@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Palette, Clock, Layout, Eye, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2 } from 'lucide-react';
+import { X, Palette, Clock, Layout, Eye, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2, Server, Database, Zap } from 'lucide-react';
 import { useSettingsStore, themes, getThemeById } from '@/lib/settings-store';
 import { useDeckStore } from '@/lib/store';
 import { useArticlesStore } from '@/lib/articles-store';
+import { useBookmarksStore } from '@/lib/bookmarks-store';
+import { migrateToBackend } from '@/lib/backend-sync';
 import { cn } from '@/lib/utils';
 
 interface SettingsModalProps {
@@ -27,6 +29,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
     briefingSettings,
     setBriefingSettings,
+
+    backendSettings,
+    setBackendSettings,
   } = useSettingsStore();
 
   const [ollamaStatus, setOllamaStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
@@ -34,9 +39,38 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [isTestingBriefing, setIsTestingBriefing] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+  const [isMigrating, setIsMigrating] = useState(false);
 
   const columns = useDeckStore((state) => state.columns);
+  const savedFeeds = useDeckStore((state) => state.savedFeeds);
   const articlesByColumn = useArticlesStore((state) => state.articlesByColumn);
+  const bookmarks = useBookmarksStore((state) => state.bookmarks);
+
+  // Check backend connection
+  useEffect(() => {
+    if (!isOpen || !backendSettings.enabled) return;
+
+    const checkBackend = async () => {
+      setBackendStatus('checking');
+      try {
+        const response = await fetch(`${backendSettings.apiUrl}/api/health`, {
+          signal: AbortSignal.timeout(5000),
+        });
+
+        if (response.ok) {
+          setBackendStatus('connected');
+          setBackendSettings({ lastSyncedAt: new Date().toISOString() });
+        } else {
+          setBackendStatus('disconnected');
+        }
+      } catch {
+        setBackendStatus('disconnected');
+      }
+    };
+
+    checkBackend();
+  }, [isOpen, backendSettings.enabled, backendSettings.apiUrl]);
 
   // Check Ollama connection when modal opens or URL changes
   useEffect(() => {
@@ -234,6 +268,229 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </div>
           </div>
 
+          {/* Backend Settings */}
+          <div className="space-y-3 pt-4 border-t border-border">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Server className="w-4 h-4 text-purple-500" />
+                Backend Storage
+              </h3>
+              <button
+                onClick={() => setBackendSettings({ enabled: !backendSettings.enabled })}
+                className={cn(
+                  'relative w-10 h-5 rounded-full transition-colors',
+                  backendSettings.enabled ? 'bg-accent' : 'bg-border'
+                )}
+              >
+                <div
+                  className={cn(
+                    'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform',
+                    backendSettings.enabled ? 'translate-x-5' : 'translate-x-0.5'
+                  )}
+                />
+              </button>
+            </div>
+
+            {backendSettings.enabled && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-1">
+                {/* Backend URL */}
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-foreground-secondary">
+                    Backend API URL
+                  </label>
+                  <input
+                    type="text"
+                    value={backendSettings.apiUrl}
+                    onChange={(e) => setBackendSettings({ apiUrl: e.target.value })}
+                    placeholder="http://localhost:3002"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                {/* Connection Status */}
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-background-tertiary">
+                  <span className="text-xs font-medium">Connection Status</span>
+                  <div className="flex items-center gap-2">
+                    {backendStatus === 'checking' && (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin text-yellow-500" />
+                        <span className="text-xs text-yellow-500">Checking...</span>
+                      </>
+                    )}
+                    {backendStatus === 'connected' && (
+                      <>
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span className="text-xs text-green-500">Connected</span>
+                      </>
+                    )}
+                    {backendStatus === 'disconnected' && (
+                      <>
+                        <XCircle className="w-3 h-3 text-red-500" />
+                        <span className="text-xs text-red-500">Disconnected</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Auto Sync Toggle */}
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-background-tertiary">
+                  <div>
+                    <span className="text-sm font-medium">Auto Sync</span>
+                    <p className="text-xs text-foreground-secondary">Automatically sync data to backend</p>
+                  </div>
+                  <button
+                    onClick={() => setBackendSettings({ autoSync: !backendSettings.autoSync })}
+                    className={cn(
+                      'relative w-10 h-5 rounded-full transition-colors',
+                      backendSettings.autoSync ? 'bg-accent' : 'bg-border'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform',
+                        backendSettings.autoSync ? 'translate-x-5' : 'translate-x-0.5'
+                      )}
+                    />
+                  </button>
+                </div>
+
+                {/* AI Tagging Toggle */}
+                <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-background-tertiary">
+                  <div>
+                    <span className="text-sm font-medium">AI Auto-Tagging</span>
+                    <p className="text-xs text-foreground-secondary">Automatically tag articles with topics & sentiment</p>
+                  </div>
+                  <button
+                    onClick={() => setBackendSettings({ aiTaggingEnabled: !backendSettings.aiTaggingEnabled })}
+                    disabled={backendStatus !== 'connected'}
+                    className={cn(
+                      'relative w-10 h-5 rounded-full transition-colors',
+                      backendSettings.aiTaggingEnabled ? 'bg-accent' : 'bg-border',
+                      backendStatus !== 'connected' && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform',
+                        backendSettings.aiTaggingEnabled ? 'translate-x-5' : 'translate-x-0.5'
+                      )}
+                    />
+                  </button>
+                </div>
+
+                {/* Migration Section */}
+                <div className="border-t border-border pt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-foreground-secondary">Data Migration</span>
+                    {backendSettings.migrationStatus === 'completed' && (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    )}
+                  </div>
+
+                  {backendSettings.migrationStatus === 'not_started' && (
+                    <button
+                      onClick={async () => {
+                        setIsMigrating(true);
+                        setBackendSettings({ migrationStatus: 'in_progress' });
+                        setErrorMessage(null);
+
+                        try {
+                          // Prepare migration data
+                          const migrationData = {
+                            columns,
+                            feeds: savedFeeds,
+                            bookmarks,
+                            settings: {
+                              theme: themeId,
+                              defaultRefreshInterval,
+                              defaultViewMode,
+                              aiSettings,
+                              briefingSettings,
+                            },
+                          };
+
+                          // Migrate to backend
+                          const result = await migrateToBackend(migrationData);
+
+                          if (result.success) {
+                            setBackendSettings({ migrationStatus: 'completed' });
+                            setTestStatus('success');
+                            setTimeout(() => setTestStatus('idle'), 3000);
+                          } else {
+                            setBackendSettings({ migrationStatus: 'failed' });
+                            setErrorMessage(result.error || 'Migration failed');
+                            setTestStatus('error');
+                          }
+                        } catch (error) {
+                          console.error('Migration error:', error);
+                          setBackendSettings({ migrationStatus: 'failed' });
+                          setErrorMessage(error instanceof Error ? error.message : 'Unknown error');
+                          setTestStatus('error');
+                        } finally {
+                          setIsMigrating(false);
+                        }
+                      }}
+                      disabled={backendStatus !== 'connected' || isMigrating}
+                      className={cn(
+                        'w-full px-4 py-2 rounded-lg border text-sm font-medium transition-colors flex items-center justify-center gap-2',
+                        backendStatus === 'connected'
+                          ? 'border-accent bg-accent text-white hover:bg-accent/90'
+                          : 'border-border bg-background-secondary text-foreground-secondary cursor-not-allowed'
+                      )}
+                    >
+                      {isMigrating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Migrating...
+                        </>
+                      ) : (
+                        <>
+                          <Database className="w-4 h-4" />
+                          Migrate Data to Backend
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  {backendSettings.migrationStatus === 'completed' && (
+                    <div className="text-xs text-green-500 flex items-center gap-2">
+                      <CheckCircle className="w-3 h-3" />
+                      Migration completed successfully
+                    </div>
+                  )}
+
+                  {backendSettings.migrationStatus === 'failed' && errorMessage && (
+                    <div className="text-xs text-red-500 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <XCircle className="w-3 h-3" />
+                        Migration failed
+                      </div>
+                      <p className="text-foreground-secondary">{errorMessage}</p>
+                      <button
+                        onClick={() => setBackendSettings({ migrationStatus: 'not_started' })}
+                        className="text-accent hover:underline"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Advanced Settings Link */}
+                <div className="border-t border-border pt-3">
+                  <a
+                    href="/admin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-accent hover:underline flex items-center gap-1"
+                  >
+                    <Zap className="w-3 h-3" />
+                    Advanced Backend Settings
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* AI Settings */}
           <div className="space-y-3 pt-4 border-t border-border">

@@ -159,17 +159,6 @@ interface SettingsState {
     lastGenerated: string | null;
   };
   setBriefingSettings: (settings: Partial<SettingsState['briefingSettings']>) => void;
-
-  backendSettings: {
-    enabled: boolean;
-    apiUrl: string;
-    autoSync: boolean;
-    aiTaggingEnabled: boolean;
-    backgroundJobsEnabled: boolean;
-    migrationStatus: 'not_started' | 'in_progress' | 'completed' | 'failed';
-    lastSyncedAt: string | null;
-  };
-  setBackendSettings: (settings: Partial<SettingsState['backendSettings']>) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -214,20 +203,6 @@ export const useSettingsStore = create<SettingsState>()(
       setBriefingSettings: (newSettings) =>
         set((state) => ({
           briefingSettings: { ...state.briefingSettings, ...newSettings }
-        })),
-
-      backendSettings: {
-        enabled: false,
-        apiUrl: 'http://localhost:3002',
-        autoSync: true,
-        aiTaggingEnabled: false,
-        backgroundJobsEnabled: false,
-        migrationStatus: 'not_started',
-        lastSyncedAt: null,
-      },
-      setBackendSettings: (newSettings) =>
-        set((state) => ({
-          backendSettings: { ...state.backendSettings, ...newSettings }
         })),
     }),
     {

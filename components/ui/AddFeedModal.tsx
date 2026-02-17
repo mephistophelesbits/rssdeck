@@ -172,7 +172,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       addColumn({
         id: crypto.randomUUID(),
         title: 'Imported Feeds',
-        type: 'multi-feed',
+        type: 'unified',
         sources: opmlFeeds.map((feed) => ({
           id: crypto.randomUUID(),
           url: feed.url,
@@ -216,7 +216,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       addColumn({
         id: crypto.randomUUID(),
         title: category,
-        type: 'multi-feed',
+        type: 'unified',
         sources: feeds.map((feed) => ({
           id: crypto.randomUUID(),
           url: feed.url,

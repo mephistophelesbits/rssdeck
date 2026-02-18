@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2 } from 'lucide-react';
+import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2, Save, Zap } from 'lucide-react';
 import { useSettingsStore, themes, getThemeById } from '@/lib/settings-store';
 import { useDeckStore } from '@/lib/store';
 import { useArticlesStore } from '@/lib/articles-store';
@@ -35,6 +35,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [isTestingAi, setIsTestingAi] = useState(false);
+  const [aiTestStatus, setAiTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [aiTestMessage, setAiTestMessage] = useState<string | null>(null);
+  const [aiSaved, setAiSaved] = useState(false);
 
   const columns = useDeckStore((state) => state.columns);
   const articlesByColumn = useArticlesStore((state) => state.articlesByColumn);
@@ -118,6 +122,47 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         setTimeout(() => setTestStatus('idle'), 3000);
       }
     }
+  };
+
+  const testAiConnection = async () => {
+    setIsTestingAi(true);
+    setAiTestStatus('idle');
+    setAiTestMessage(null);
+    try {
+      const res = await fetch('/api/ai/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Connection test',
+          content: 'Reply with exactly one word: OK',
+          provider: aiSettings.provider,
+          apiKey: aiSettings.apiKey,
+          ollamaUrl: aiSettings.ollamaUrl,
+          model: aiSettings.model,
+          language: 'English',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.summary) {
+        setAiTestStatus('success');
+        setAiTestMessage('Connection successful!');
+        setTimeout(() => setAiTestStatus('idle'), 4000);
+      } else {
+        setAiTestStatus('error');
+        setAiTestMessage(data.error || 'No response from model');
+      }
+    } catch (err: any) {
+      setAiTestStatus('error');
+      setAiTestMessage(err.message || 'Request failed');
+    } finally {
+      setIsTestingAi(false);
+    }
+  };
+
+  const handleSaveAi = () => {
+    // Settings are already persisted via Zustand, just show confirmation
+    setAiSaved(true);
+    setTimeout(() => setAiSaved(false), 2000);
   };
 
   if (!isOpen) return null;
@@ -403,6 +448,49 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     <option value="Korean">Korean</option>
                     <option value="Portuguese">Portuguese</option>
                   </select>
+                </div>
+
+                {/* Save & Test buttons */}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={handleSaveAi}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${aiSaved
+                        ? 'bg-success text-white'
+                        : 'bg-accent text-white hover:bg-accent/90'
+                      }`}
+                  >
+                    {aiSaved ? (
+                      <><CheckCircle className="w-3.5 h-3.5" /> Saved!</>
+                    ) : (
+                      <><Save className="w-3.5 h-3.5" /> Save</>
+                    )}
+                  </button>
+                  <button
+                    onClick={testAiConnection}
+                    disabled={isTestingAi}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${aiTestStatus === 'success'
+                        ? 'border-success text-success bg-success/10'
+                        : aiTestStatus === 'error'
+                          ? 'border-error text-error bg-error/10'
+                          : 'border-border text-foreground-secondary hover:text-foreground hover:border-foreground-secondary'
+                      } disabled:opacity-50`}
+                  >
+                    {isTestingAi ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Testing...</>
+                    ) : aiTestStatus === 'success' ? (
+                      <><CheckCircle className="w-3.5 h-3.5" /> Working!</>
+                    ) : aiTestStatus === 'error' ? (
+                      <><XCircle className="w-3.5 h-3.5" /> Failed</>
+                    ) : (
+                      <><Zap className="w-3.5 h-3.5" /> Test AI</>
+                    )}
+                  </button>
+                  {aiTestMessage && (
+                    <span className={`text-xs truncate ${aiTestStatus === 'success' ? 'text-success' : 'text-error'
+                      }`}>
+                      {aiTestMessage}
+                    </span>
+                  )}
                 </div>
 
               </div>

@@ -13,7 +13,7 @@ A modern, multi-column RSS reader with local AI integration for summarizing, sen
 
 🤖 **Local AI Integration** - Powered by Ollama for privacy-first AI features:
   - Instant article summarization
-  - Sentiment analysis (🟢 positive, 🔴 negative)
+  - Smart AI Settings (Per-provider keys, Connection Testing)
   - Chat with any article
 
 🔒 **Privacy Focused** - Everything runs locally. No cloud APIs, no data collection
@@ -145,6 +145,12 @@ rss-deck/
 - **Deployment**: Docker
 
 ## 📋 Changelog
+
+### v1.3.0 (Feb 2026)
+- **Smart AI Settings** - Configure separate API keys for OpenAI, Anthropic, Gemini, deepseek etc. Keys are automatically switched when you change providers.
+- **Connection Testing** - "Test AI" button to verify your API key and network connection (with timeout protection).
+- **Latest Models** - Updated default models to Feb 2026 state-of-the-art (GPT-4.1, Claude 3.6 Sonnet, Gemini 3.0 Pro).
+- **UI Polish** - Added API key visibility toggle and removed deprecated sentiment analysis features.
 
 ### v1.2.0 (Feb 2026)
 - **Inline Reading Column** - Article content now opens as a dedicated column next to the source feed, keeping all other columns visible

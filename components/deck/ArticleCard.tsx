@@ -61,7 +61,7 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
           title: article.title,
           content: article.content || article.contentSnippet || '',
           provider: aiSettings.provider,
-          apiKey: aiSettings.apiKey,
+          apiKey: aiSettings.apiKeys?.[aiSettings.provider] || '',
           ollamaUrl: aiSettings.ollamaUrl,
           model: aiSettings.model,
           language: aiSettings.language,

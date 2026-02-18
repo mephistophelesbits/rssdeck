@@ -144,7 +144,7 @@ interface SettingsState {
     sentimentEnabled: boolean;
     provider: 'ollama' | 'openai' | 'anthropic' | 'gemini' | 'minimax' | 'kimi';
     ollamaUrl: string;
-    apiKey: string;
+    apiKeys: Record<string, string>;
     model: string;
     language: string;
   };
@@ -176,7 +176,7 @@ export const useSettingsStore = create<SettingsState>()(
         sentimentEnabled: true,
         provider: 'ollama',
         ollamaUrl: 'http://localhost:11434',
-        apiKey: '',
+        apiKeys: {},
         model: 'llama3.2',
         language: 'Original Language',
       },
@@ -207,11 +207,23 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'rss-deck-settings',
-      version: 1,
+      version: 2,
       migrate: (persistedState: any, version) => {
         if (version === 0) {
           if (persistedState.briefingSettings && !persistedState.briefingSettings.times) {
             persistedState.briefingSettings.times = [persistedState.briefingSettings.time || '08:00'];
+          }
+        }
+        if (version < 2) {
+          // Migrate single apiKey to apiKeys map based on current provider
+          if (persistedState.aiSettings) {
+            const currentKey = persistedState.aiSettings.apiKey || '';
+            const provider = persistedState.aiSettings.provider || 'openai';
+            persistedState.aiSettings.apiKeys = {
+              [provider]: currentKey
+            };
+            // Clean up old field if possible, though strict typing might ignore it
+            delete persistedState.aiSettings.apiKey;
           }
         }
         return persistedState;

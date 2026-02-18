@@ -128,6 +128,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setIsTestingAi(true);
     setAiTestStatus('idle');
     setAiTestMessage(null);
+
+    // 15s timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+
     try {
       const res = await fetch('/api/ai/summarize', {
         method: 'POST',
@@ -136,12 +141,15 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           title: 'Connection test',
           content: 'Reply with exactly one word: OK',
           provider: aiSettings.provider,
-          apiKey: aiSettings.apiKey,
+          apiKey: aiSettings.apiKeys?.[aiSettings.provider] || '',
           ollamaUrl: aiSettings.ollamaUrl,
           model: aiSettings.model,
           language: 'English',
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
+
       const data = await res.json();
       if (res.ok && data.summary) {
         setAiTestStatus('success');
@@ -152,10 +160,16 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         setAiTestMessage(data.error || 'No response from model');
       }
     } catch (err: any) {
-      setAiTestStatus('error');
-      setAiTestMessage(err.message || 'Request failed');
+      if (err.name === 'AbortError') {
+        setAiTestStatus('error');
+        setAiTestMessage('Request timed out (15s)');
+      } else {
+        setAiTestStatus('error');
+        setAiTestMessage(err.message || 'Request failed');
+      }
     } finally {
       setIsTestingAi(false);
+      clearTimeout(timeoutId);
     }
   };
 
@@ -341,8 +355,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     <div className="relative">
                       <input
                         type={showApiKey ? 'text' : 'password'}
-                        value={aiSettings.apiKey}
-                        onChange={(e) => setAiSettings({ apiKey: e.target.value })}
+                        value={aiSettings.apiKeys?.[aiSettings.provider] || ''}
+                        onChange={(e) => {
+                          const newApiKeys = { ...(aiSettings.apiKeys || {}), [aiSettings.provider]: e.target.value };
+                          setAiSettings({ apiKeys: newApiKeys });
+                        }}
                         placeholder={`Enter ${aiSettings.provider} API key`}
                         className="w-full px-3 py-2 pr-9 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none transition-all"
                       />
@@ -455,8 +472,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   <button
                     onClick={handleSaveAi}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${aiSaved
-                        ? 'bg-success text-white'
-                        : 'bg-accent text-white hover:bg-accent/90'
+                      ? 'bg-success text-white'
+                      : 'bg-accent text-white hover:bg-accent/90'
                       }`}
                   >
                     {aiSaved ? (
@@ -469,10 +486,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     onClick={testAiConnection}
                     disabled={isTestingAi}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${aiTestStatus === 'success'
-                        ? 'border-success text-success bg-success/10'
-                        : aiTestStatus === 'error'
-                          ? 'border-error text-error bg-error/10'
-                          : 'border-border text-foreground-secondary hover:text-foreground hover:border-foreground-secondary'
+                      ? 'border-success text-success bg-success/10'
+                      : aiTestStatus === 'error'
+                        ? 'border-error text-error bg-error/10'
+                        : 'border-border text-foreground-secondary hover:text-foreground hover:border-foreground-secondary'
                       } disabled:opacity-50`}
                   >
                     {isTestingAi ? (

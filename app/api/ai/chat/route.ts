@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const selectedModel = model || (provider === 'ollama' ? 'llama3.2' : 'gpt-4o-mini');
+    const selectedModel = model || (provider === 'ollama' ? 'llama3.2' : 'gpt-4.1');
 
     // Optionally search the web for additional context
     let webResults: WebSearchResult[] = [];

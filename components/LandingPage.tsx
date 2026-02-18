@@ -3,82 +3,82 @@
 import { useEffect } from 'react';
 
 export default function LandingPage() {
-    useEffect(() => {
-        // Scroll animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-
-        // Carousel logic
-        const track = document.getElementById('carouselTrack');
-        const dots = document.querySelectorAll('.carousel-dot');
-        const label = document.getElementById('carouselLabel');
-        const labels = ['Cyberpunk Theme', 'Warm Amber Theme', 'Matrix Theme'];
-        let current = 0;
-        let autoplayInterval: NodeJS.Timeout;
-
-        function goToSlide(index: number) {
-            current = index;
-            if (track) track.style.transform = `translateX(-${current * 100}%)`;
-            dots.forEach((d, i) => d.classList.toggle('active', i === current));
-            if (label) label.textContent = labels[current];
+  useEffect(() => {
+    // Scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
         }
+      });
+    }, { threshold: 0.1 });
 
-        dots.forEach(dot => {
-            dot.addEventListener('click', () => {
-                const indexStr = (dot as HTMLElement).dataset.index;
-                if (indexStr !== undefined) {
-                    goToSlide(parseInt(indexStr));
-                    resetAutoplay();
-                }
-            });
-        });
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
 
-        function autoplay() {
-            goToSlide((current + 1) % 3);
+    // Carousel logic
+    const track = document.getElementById('carouselTrack');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const label = document.getElementById('carouselLabel');
+    const labels = ['Cyberpunk Theme', 'Warm Amber Theme', 'Matrix Theme'];
+    let current = 0;
+    let autoplayInterval: NodeJS.Timeout;
+
+    function goToSlide(index: number) {
+      current = index;
+      if (track) track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      if (label) label.textContent = labels[current];
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const indexStr = (dot as HTMLElement).dataset.index;
+        if (indexStr !== undefined) {
+          goToSlide(parseInt(indexStr));
+          resetAutoplay();
         }
+      });
+    });
 
-        function resetAutoplay() {
-            clearInterval(autoplayInterval);
-            autoplayInterval = setInterval(autoplay, 4000);
+    function autoplay() {
+      goToSlide((current + 1) % 3);
+    }
+
+    function resetAutoplay() {
+      clearInterval(autoplayInterval);
+      autoplayInterval = setInterval(autoplay, 4000);
+    }
+
+    autoplayInterval = setInterval(autoplay, 4000);
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        if (targetId) {
+          const target = document.querySelector(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
         }
+      });
+    });
 
-        autoplayInterval = setInterval(autoplay, 4000);
+    // Dark mode initialization
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.documentElement.classList.add('dark');
+    }
 
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href');
-                if (targetId) {
-                    const target = document.querySelector(targetId);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            });
-        });
+    return () => {
+      clearInterval(autoplayInterval);
+      observer.disconnect();
+    };
+  }, []);
 
-        // Dark mode initialization
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-
-        return () => {
-            clearInterval(autoplayInterval);
-            observer.disconnect();
-        };
-    }, []);
-
-    return (
-        <div className="landing-page">
-            <style jsx global>{`
+  return (
+    <div className="landing-page">
+      <style jsx global>{`
         :root {
           --bg-primary: #f8fafc;
           --bg-secondary: #f1f5f9;
@@ -449,146 +449,143 @@ export default function LandingPage() {
         footer { padding: 48px 0; background: var(--bg-primary); border-top: 1px solid var(--border); }
       `}</style>
 
-            {/* ===== NAV ===== */}
-            <nav>
-                <div className="container nav-inner">
-                    <a className="logo" href="#">
-                        <span className="material-symbols-outlined logo-icon">rss_feed</span>
-                        <span className="logo-text">RSS<span>DECK</span></span>
-                        <span className="logo-badge">SELF-HOSTED</span>
-                    </a>
-                    <div className="nav-links">
-                        <a href="#features">Features</a>
-                        <a href="#privacy">Privacy</a>
-                        <a href="#themes">Themes</a>
-                        <a href="#deploy">Self-Host</a>
-                        <button className="theme-toggle" onClick={() => document.documentElement.classList.toggle('dark')}>
-                            <span className="material-symbols-outlined dark-icon">dark_mode</span>
-                            <span className="material-symbols-outlined light-icon">light_mode</span>
-                        </button>
-                        <a className="nav-cta" href="#deploy">Get Started</a>
-                    </div>
-                </div>
-            </nav>
-
-            {/* ===== HERO ===== */}
-            <section className="hero">
-                <div className="container">
-                    <div className="flex flex-col items-center">
-                        <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green/10 border border-green/30 text-green text-sm font-semibold mb-6">
-                            <span className="material-symbols-outlined text-base">shield_lock</span>
-                            100% Private & Self-Hosted
-                        </div>
-                        <h1>
-                            Own Your Data.<br />
-                            <span className="gradient">Command Your News.</span>
-                        </h1>
-                        <p className="hero-subtitle">
-                            A privacy-first RSS reader designed for power users. Run it on your
-                            <strong> NAS</strong>, <strong>Home Server</strong>, or <strong>Local PC</strong>
-                            with zero-cloud AI summarization powered by Ollama.
-                        </p>
-                        <div className="hero-buttons">
-                            <a className="btn-primary" href="/dashboard">
-                                <span className="material-symbols-outlined">visibility</span>
-                                Live Preview
-                            </a>
-                            <a className="btn-secondary" href="#deploy">
-                                <span className="material-symbols-outlined">dns</span>
-                                Deploy Locally
-                            </a>
-                            <a className="btn-secondary" href="https://github.com/mephistophelesbits/rssdeck" target="_blank">
-                                <span className="material-symbols-outlined">code</span>
-                                View Source
-                            </a>
-                        </div>
-
-                        {/* Product Screenshot */}
-                        <div className="hero-screenshot mt-12 w-full">
-                            <div className="screenshot-frame">
-                                <div className="screenshot-titlebar">
-                                    <div className="titlebar-dots">
-                                        <span></span><span></span><span></span>
-                                    </div>
-                                    <div className="titlebar-url">rssdeck.vercel.app</div>
-                                    <span className="material-symbols-outlined text-green">lock</span>
-                                </div>
-                                <div className="screenshot-carousel" id="carousel">
-                                    <div className="carousel-track" id="carouselTrack">
-                                        <img src="/Screenshot 2026-02-12 at 17.32.12.png" alt="Cyberpunk" />
-                                        <img src="/Screenshot 2026-02-12 at 17.32.18.png" alt="Amber" />
-                                        <img src="/Screenshot 2026-02-12 at 17.32.40.png" alt="Matrix" />
-                                    </div>
-                                    <div className="carousel-dots" id="carouselDots">
-                                        <button className="carousel-dot active" data-index="0"></button>
-                                        <button className="carousel-dot" data-index="1"></button>
-                                        <button className="carousel-dot" data-index="2"></button>
-                                    </div>
-                                    <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-white text-xs font-semibold" id="carouselLabel">Cyberpunk Theme</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Simple sections for brevity in this component - real version would have full content */}
-            <section className="features-section" id="features">
-                <div className="container">
-                    <h2 className="text-3xl font-extrabold text-center mb-12">Built for Power Users</h2>
-                    <div className="features-grid">
-                        <div className="feature-card animate-on-scroll">
-                            <div className="w-11 h-11 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center mb-5">
-                                <span className="material-symbols-outlined">lan</span>
-                            </div>
-                            <h3 className="font-bold mb-2">Network Sovereignty</h3>
-                            <p className="text-sm opacity-80">Runs entirely on your LAN. Access via VPN or local IP. You own the hardware.</p>
-                        </div>
-                        <div className="feature-card animate-on-scroll border-b-2 border-green">
-                            <div className="w-11 h-11 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center mb-5">
-                                <span className="material-symbols-outlined">neurology</span>
-                            </div>
-                            <h3 className="font-bold mb-2">Local-First AI</h3>
-                            <p className="text-sm opacity-80">Leverages Ollama to run LLMs on your machine. Instant offline AI summaries.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="deploy-section" id="deploy">
-                <div className="container">
-                    <div className="deploy-card">
-                        <h2 className="text-4xl font-black mb-6">Host It Anywhere</h2>
-                        <div className="grid md:grid-cols-2 gap-12 items-center">
-                            <div className="flex flex-col gap-6">
-                                <div className="flex gap-4">
-                                    <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/20"><span className="material-symbols-outlined">dns</span></div>
-                                    <div><h4 className="font-bold">Home Server</h4><p className="text-sm opacity-60">Docker ready for ARM and x86.</p></div>
-                                </div>
-                                <a href="https://hub.docker.com/r/kianfong/rssdeck" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold inline-block text-center mt-4">Docker Hub</a>
-                            </div>
-                            <div className="bg-black/40 border border-white/10 rounded-2xl p-6 font-mono text-sm">
-                                <div className="text-green text-xs font-bold mb-4 uppercase tracking-widest">Self-Host Command</div>
-                                <div className="text-blue-400">docker pull kianfong/rssdeck:latest</div>
-                                <div className="text-teal-400 mt-2">docker run -d -p 3000:3000 \</div>
-                                <div className="text-teal-400">  -v rss-data:/app/data \</div>
-                                <div className="text-teal-400">  --name rssdeck kianfong/rssdeck</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <footer>
-                <div className="container py-12 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2 font-black uppercase"><span className="material-symbols-outlined text-green">shield_person</span> RSS DECK</div>
-                    <div className="flex gap-8 text-xs font-medium opacity-50">
-                        <a href="https://github.com/mephistophelesbits/rssdeck">GitHub</a>
-                        <a href="https://hub.docker.com/r/kianfong/rssdeck">Docker</a>
-                    </div>
-                    <div className="text-xs opacity-50">© 2026 RSS Deck. Open Source.</div>
-                </div>
-            </footer>
+      {/* ===== NAV ===== */}
+      <nav>
+        <div className="container nav-inner">
+          <a className="logo" href="#">
+            <span className="material-symbols-outlined logo-icon">rss_feed</span>
+            <span className="logo-text">RSS<span>DECK</span></span>
+            <span className="logo-badge">SELF-HOSTED</span>
+          </a>
+          <div className="nav-links">
+            <a href="#features">Features</a>
+            <a href="#privacy">Privacy</a>
+            <a href="#themes">Themes</a>
+            <a href="#deploy">Self-Host</a>
+            <button className="theme-toggle" onClick={() => document.documentElement.classList.toggle('dark')}>
+              <span className="material-symbols-outlined dark-icon">dark_mode</span>
+              <span className="material-symbols-outlined light-icon">light_mode</span>
+            </button>
+            <a className="nav-cta" href="#deploy">Get Started</a>
+          </div>
         </div>
-    );
+      </nav>
+
+      {/* ===== HERO ===== */}
+      <section className="hero">
+        <div className="container">
+          <div className="flex flex-col items-center">
+            <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green/10 border border-green/30 text-green text-sm font-semibold mb-6">
+              <span className="material-symbols-outlined text-base">shield_lock</span>
+              100% Private & Self-Hosted
+            </div>
+            <h1>
+              Own Your Data.<br />
+              <span className="gradient">Command Your News.</span>
+            </h1>
+            <p className="hero-subtitle">
+              A privacy-first RSS reader designed for power users. Run it on your
+              <strong> NAS</strong>, <strong>Home Server</strong>, or <strong>Local PC</strong>
+              with zero-cloud AI summarization powered by Ollama.
+            </p>
+            <div className="hero-buttons">
+              <a className="btn-primary" href="/dashboard">
+                Live Preview
+              </a>
+              <a className="btn-secondary" href="#deploy">
+                Deploy Locally
+              </a>
+              <a className="btn-secondary" href="https://github.com/mephistophelesbits/rssdeck" target="_blank">
+                View Source
+              </a>
+            </div>
+
+            {/* Product Screenshot */}
+            <div className="hero-screenshot mt-12 w-full">
+              <div className="screenshot-frame">
+                <div className="screenshot-titlebar">
+                  <div className="titlebar-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div className="titlebar-url">rssdeck.vercel.app</div>
+                  <span className="material-symbols-outlined text-green">lock</span>
+                </div>
+                <div className="screenshot-carousel" id="carousel">
+                  <div className="carousel-track" id="carouselTrack">
+                    <img src="/Screenshot 2026-02-12 at 17.32.12.png" alt="Cyberpunk" />
+                    <img src="/Screenshot 2026-02-12 at 17.32.18.png" alt="Amber" />
+                    <img src="/Screenshot 2026-02-12 at 17.32.40.png" alt="Matrix" />
+                  </div>
+                  <div className="carousel-dots" id="carouselDots">
+                    <button className="carousel-dot active" data-index="0"></button>
+                    <button className="carousel-dot" data-index="1"></button>
+                    <button className="carousel-dot" data-index="2"></button>
+                  </div>
+                  <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur px-3 py-1 rounded text-white text-xs font-semibold" id="carouselLabel">Cyberpunk Theme</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Simple sections for brevity in this component - real version would have full content */}
+      <section className="features-section" id="features">
+        <div className="container">
+          <h2 className="text-3xl font-extrabold text-center mb-12">Built for Power Users</h2>
+          <div className="features-grid">
+            <div className="feature-card animate-on-scroll">
+              <div className="w-11 h-11 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center mb-5">
+                <span className="material-symbols-outlined">lan</span>
+              </div>
+              <h3 className="font-bold mb-2">Network Sovereignty</h3>
+              <p className="text-sm opacity-80">Runs entirely on your LAN. Access via VPN or local IP. You own the hardware.</p>
+            </div>
+            <div className="feature-card animate-on-scroll border-b-2 border-green">
+              <div className="w-11 h-11 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center mb-5">
+                <span className="material-symbols-outlined">neurology</span>
+              </div>
+              <h3 className="font-bold mb-2">Local-First AI</h3>
+              <p className="text-sm opacity-80">Leverages Ollama to run LLMs on your machine. Instant offline AI summaries.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="deploy-section" id="deploy">
+        <div className="container">
+          <div className="deploy-card">
+            <h2 className="text-4xl font-black mb-6">Host It Anywhere</h2>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="flex flex-col gap-6">
+                <div className="flex gap-4">
+                  <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/20"><span className="material-symbols-outlined">dns</span></div>
+                  <div><h4 className="font-bold">Home Server</h4><p className="text-sm opacity-60">Docker ready for ARM and x86.</p></div>
+                </div>
+                <a href="https://hub.docker.com/r/kianfong/rssdeck" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold inline-block text-center mt-4">Docker Hub</a>
+              </div>
+              <div className="bg-black/40 border border-white/10 rounded-2xl p-6 font-mono text-sm">
+                <div className="text-green text-xs font-bold mb-4 uppercase tracking-widest">Self-Host Command</div>
+                <div className="text-blue-400">docker pull kianfong/rssdeck:latest</div>
+                <div className="text-teal-400 mt-2">docker run -d -p 3000:3000 \</div>
+                <div className="text-teal-400">  -v rss-data:/app/data \</div>
+                <div className="text-teal-400">  --name rssdeck kianfong/rssdeck</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div className="container py-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2 font-black uppercase"><span className="material-symbols-outlined text-green">shield_person</span> RSS DECK</div>
+          <div className="flex gap-8 text-xs font-medium opacity-50">
+            <a href="https://github.com/mephistophelesbits/rssdeck">GitHub</a>
+            <a href="https://hub.docker.com/r/kianfong/rssdeck">Docker</a>
+          </div>
+          <div className="text-xs opacity-50">© 2026 RSS Deck. Open Source.</div>
+        </div>
+      </footer>
+    </div>
+  );
 }

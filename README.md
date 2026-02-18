@@ -20,6 +20,8 @@ A modern, multi-column RSS reader with local AI integration for summarizing, sen
 
 📰 **Full-Article Scraping** - Custom scraper with Mozilla's Readability for complete article content
 
+📖 **Inline Reading Column** - Click any article to open it as a dedicated reading column right next to the feed, without covering other content
+
 🎨 **Beautiful Themes** - Multiple color schemes including:
   - Cyberpunk Neon
   - Dark Mode
@@ -103,11 +105,17 @@ rss-deck/
 ├── app/
 │   ├── api/              # API routes (RSS, AI, scraping)
 │   ├── bookmarks/        # Bookmarks page
-│   ├── page.tsx          # Main dashboard
+│   ├── dashboard/        # Dashboard route (/dashboard)
+│   ├── page.tsx          # Root page (Dashboard by default, Landing in production)
 │   └── layout.tsx        # App layout
 ├── components/
 │   ├── deck/             # Deck column components
+│   │   ├── DeckContainer.tsx
+│   │   ├── Column.tsx
+│   │   └── ReadingColumn.tsx  # Inline reading panel
 │   ├── ui/               # UI components
+│   ├── Dashboard.tsx     # Main dashboard component
+│   ├── LandingPage.tsx   # Marketing landing page
 │   ├── BriefingManager.tsx
 │   └── ThemeProvider.tsx
 ├── lib/
@@ -138,12 +146,17 @@ rss-deck/
 
 ## 📋 Changelog
 
+### v1.2.0 (Feb 2026)
+- **Inline Reading Column** - Article content now opens as a dedicated column next to the source feed, keeping all other columns visible
+- **Separated Landing & Dashboard** - Dashboard is the default app view; the marketing landing page is served separately in production via `NEXT_PUBLIC_APP_MODE=landing`
+- **Reading Column Styling** - Reading panel features a distinct accent-tinted background and border to differentiate it from feed columns
+
 ### v1.1.0 (Feb 2026)
 - **OPML Import** - Bulk import feeds from Feedly, Inoreader, Google Reader
 - **Summary Caching** - Stable article IDs prevent re-summarizing
 - **Notification Rate Limiting** - 1-hour cooldown per article
 - **Telegram Briefings** - Daily AI-curated news delivered to Telegram
-- **Landing Page** - Product page at `/landing`
+- **Landing Page** - Product marketing page (served via `NEXT_PUBLIC_APP_MODE=landing`)
 - **Stock Ticker** - Real-time portfolio with AI trading signals
 - **8 Themes** - Including J.A.R.V.I.S., Matrix, Cyberpunk
 

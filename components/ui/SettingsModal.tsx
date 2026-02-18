@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Palette, Clock, Eye, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2 } from 'lucide-react';
+import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2 } from 'lucide-react';
 import { useSettingsStore, themes, getThemeById } from '@/lib/settings-store';
 import { useDeckStore } from '@/lib/store';
 import { useArticlesStore } from '@/lib/articles-store';
@@ -34,6 +34,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [isTestingBriefing, setIsTestingBriefing] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const columns = useDeckStore((state) => state.columns);
   const articlesByColumn = useArticlesStore((state) => state.articlesByColumn);
@@ -292,13 +293,23 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     <label className="text-xs font-medium text-foreground-secondary">
                       API Key
                     </label>
-                    <input
-                      type="password"
-                      value={aiSettings.apiKey}
-                      onChange={(e) => setAiSettings({ apiKey: e.target.value })}
-                      placeholder={`Enter ${aiSettings.provider} API key`}
-                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none transition-all"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showApiKey ? 'text' : 'password'}
+                        value={aiSettings.apiKey}
+                        onChange={(e) => setAiSettings({ apiKey: e.target.value })}
+                        placeholder={`Enter ${aiSettings.provider} API key`}
+                        className="w-full px-3 py-2 pr-9 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-secondary hover:text-foreground transition-colors"
+                        title={showApiKey ? 'Hide API key' : 'Show API key'}
+                      >
+                        {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -394,27 +405,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                   </select>
                 </div>
 
-                {/* Sentiment Analysis Toggle */}
-                <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-background-tertiary mt-2">
-                  <div>
-                    <span className="text-sm font-medium">Sentiment Analysis</span>
-                    <p className="text-xs text-foreground-secondary">Show vibe dots on article headlines</p>
-                  </div>
-                  <button
-                    onClick={() => setAiSettings({ sentimentEnabled: !aiSettings.sentimentEnabled })}
-                    className={cn(
-                      'relative w-10 h-5 rounded-full transition-colors',
-                      aiSettings.sentimentEnabled ? 'bg-accent' : 'bg-border'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform',
-                        aiSettings.sentimentEnabled ? 'translate-x-5' : 'translate-x-0.5'
-                      )}
-                    />
-                  </button>
-                </div>
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bookmark, Sparkles, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Article } from '@/lib/types';
@@ -7,7 +7,6 @@ import { useSettingsStore } from '@/lib/settings-store';
 import { TimeAgo } from '@/components/ui/TimeAgo';
 import { cn, decodeHtml } from '@/lib/utils';
 
-type Sentiment = 'Positive' | 'Negative' | 'Neutral' | null;
 
 interface ArticleCardProps {
   article: Article;
@@ -16,8 +15,7 @@ interface ArticleCardProps {
   isSelected?: boolean;
 }
 
-// Global cache for sentiment results to avoid re-fetching
-const sentimentCache = new Map<string, Sentiment>();
+
 
 export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSelected = false }: ArticleCardProps) {
   const { isBookmarked, toggleBookmark } = useBookmarksStore();
@@ -28,69 +26,6 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
-  // Sentiment state
-  const [sentiment, setSentiment] = useState<Sentiment>(sentimentCache.get(article.id) || null);
-  const [isAnalyzingSentiment, setIsAnalyzingSentiment] = useState(false);
-
-  // Auto-fetch sentiment when AI is enabled (optional - can be made on-demand)
-  useEffect(() => {
-    if (aiSettings.enabled && aiSettings.sentimentEnabled && !sentiment && !isAnalyzingSentiment) {
-      fetchSentiment();
-    }
-  }, [article.id, aiSettings.enabled, aiSettings.sentimentEnabled]);
-
-  const fetchSentiment = async () => {
-    if (sentiment || isAnalyzingSentiment) return;
-
-    // Check cache first
-    const cached = sentimentCache.get(article.id);
-    if (cached) {
-      setSentiment(cached);
-      return;
-    }
-
-    setIsAnalyzingSentiment(true);
-    try {
-      const res = await fetch('/api/ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          task: 'sentiment',
-          content: article.title,
-          provider: aiSettings.provider,
-          apiKey: aiSettings.apiKey,
-          ollamaUrl: aiSettings.ollamaUrl,
-          model: aiSettings.model,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.sentiment) {
-        setSentiment(data.sentiment);
-        sentimentCache.set(article.id, data.sentiment);
-      }
-    } catch (err) {
-      console.error('Sentiment analysis failed:', err);
-    } finally {
-      setIsAnalyzingSentiment(false);
-    }
-  };
-
-  const getSentimentDot = () => {
-    if (isAnalyzingSentiment) {
-      return <span className="w-2 h-2 rounded-full bg-foreground-secondary/50 animate-pulse" title="Analyzing..." />;
-    }
-    switch (sentiment) {
-      case 'Positive':
-        return <span className="w-2 h-2 rounded-full bg-success" title="Positive sentiment" />;
-      case 'Negative':
-        return <span className="w-2 h-2 rounded-full bg-error" title="Negative sentiment" />;
-      case 'Neutral':
-        return <span className="w-2 h-2 rounded-full bg-foreground-secondary/50" title="Neutral sentiment" />;
-      default:
-        return null;
-    }
-  };
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -168,12 +103,7 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
-            {/* Sentiment indicator dot */}
-            {aiSettings.enabled && aiSettings.sentimentEnabled && (
-              <div className="flex-shrink-0 mt-1.5">
-                {getSentimentDot()}
-              </div>
-            )}
+
             <h3
               className={cn(
                 'font-medium text-foreground group-hover:text-accent transition-colors line-clamp-2 pr-6',

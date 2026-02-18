@@ -80,7 +80,7 @@ async function generateOpenAI(prompt: string, options: AIRequestOptions): Promis
             'Authorization': `Bearer ${options.apiKey}`,
         },
         body: JSON.stringify({
-            model: options.model || 'gpt-4o-mini',
+            model: options.model || 'gpt-4.1',
             messages: [{ role: 'user', content: prompt }],
             temperature: options.temperature ?? 0.7,
             max_tokens: options.maxTokens,
@@ -114,7 +114,7 @@ async function generateAnthropic(prompt: string, options: AIRequestOptions): Pro
             'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-            model: options.model || 'claude-3-5-sonnet-20240620',
+            model: options.model || 'claude-sonnet-4-6',
             messages: [{ role: 'user', content: prompt }],
             max_tokens: options.maxTokens || 1024,
             temperature: options.temperature ?? 0.7,
@@ -140,7 +140,7 @@ async function generateAnthropic(prompt: string, options: AIRequestOptions): Pro
 async function generateGemini(prompt: string, options: AIRequestOptions): Promise<AIResponse> {
     if (!options.apiKey) throw new Error('Gemini API key is required');
 
-    const model = options.model || 'gemini-2.0-flash';
+    const model = options.model || 'gemini-3-pro-preview';
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${options.apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,7 +174,7 @@ async function generateMinimax(prompt: string, options: AIRequestOptions): Promi
             'Authorization': `Bearer ${options.apiKey}`,
         },
         body: JSON.stringify({
-            model: options.model || 'MiniMax-M1',
+            model: options.model || 'MiniMax-M2.5',
             messages: [{ role: 'user', content: prompt }],
             temperature: options.temperature ?? 0.7,
             max_tokens: options.maxTokens,
@@ -207,7 +207,7 @@ async function generateKimi(prompt: string, options: AIRequestOptions): Promise<
             'Authorization': `Bearer ${options.apiKey}`,
         },
         body: JSON.stringify({
-            model: options.model || 'kimi-k2-turbo-preview',
+            model: options.model || 'kimi-k2.5',
             messages: [{ role: 'user', content: prompt }],
             temperature: options.temperature ?? 0.6,
             max_tokens: options.maxTokens,
@@ -265,7 +265,7 @@ async function generateChatOpenAI(messages: AIChatMessage[], options: AIRequestO
             'Authorization': `Bearer ${options.apiKey}`,
         },
         body: JSON.stringify({
-            model: options.model || 'gpt-4o-mini',
+            model: options.model || 'gpt-4.1',
             messages,
             temperature: options.temperature ?? 0.7,
             max_tokens: options.maxTokens,
@@ -326,7 +326,7 @@ async function generateChatAnthropic(messages: AIChatMessage[], options: AIReque
             'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-            model: options.model || 'claude-3-5-sonnet-20240620',
+            model: options.model || 'claude-sonnet-4-6',
             system: systemMessage,
             messages: chatMessages,
             max_tokens: options.maxTokens || 1024,
@@ -353,7 +353,7 @@ async function generateChatAnthropic(messages: AIChatMessage[], options: AIReque
 async function generateChatGemini(messages: AIChatMessage[], options: AIRequestOptions): Promise<AIResponse> {
     if (!options.apiKey) throw new Error('Gemini API key is required');
 
-    const model = options.model || 'gemini-2.0-flash';
+    const model = options.model || 'gemini-3-pro-preview';
 
     // Convert OpenAI-style messages to Gemini style
     const contents = messages.filter(m => m.role !== 'system').map(m => ({
@@ -397,7 +397,7 @@ async function generateChatMinimax(messages: AIChatMessage[], options: AIRequest
             'Authorization': `Bearer ${options.apiKey}`,
         },
         body: JSON.stringify({
-            model: options.model || 'MiniMax-M1',
+            model: options.model || 'MiniMax-M2.5',
             messages,
             temperature: options.temperature ?? 0.7,
             max_tokens: options.maxTokens,
@@ -430,7 +430,7 @@ async function generateChatKimi(messages: AIChatMessage[], options: AIRequestOpt
             'Authorization': `Bearer ${options.apiKey}`,
         },
         body: JSON.stringify({
-            model: options.model || 'kimi-k2-turbo-preview',
+            model: options.model || 'kimi-k2.5',
             messages,
             temperature: options.temperature ?? 0.6,
             max_tokens: options.maxTokens,

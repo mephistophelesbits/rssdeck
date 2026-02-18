@@ -142,7 +142,7 @@ interface SettingsState {
   aiSettings: {
     enabled: boolean;
     sentimentEnabled: boolean;
-    provider: 'ollama' | 'openai' | 'anthropic' | 'gemini';
+    provider: 'ollama' | 'openai' | 'anthropic' | 'gemini' | 'minimax' | 'kimi';
     ollamaUrl: string;
     apiKey: string;
     model: string;

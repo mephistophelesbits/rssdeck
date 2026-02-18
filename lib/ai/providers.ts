@@ -1,4 +1,4 @@
-export type AIProvider = 'ollama' | 'openai' | 'anthropic' | 'gemini';
+export type AIProvider = 'ollama' | 'openai' | 'anthropic' | 'gemini' | 'minimax' | 'kimi';
 
 export interface AIResponse {
     text: string;
@@ -36,6 +36,10 @@ export async function generateText(
             return await generateAnthropic(prompt, options);
         case 'gemini':
             return await generateGemini(prompt, options);
+        case 'minimax':
+            return await generateMinimax(prompt, options);
+        case 'kimi':
+            return await generateKimi(prompt, options);
         default:
             throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -160,6 +164,72 @@ async function generateGemini(prompt: string, options: AIRequestOptions): Promis
     };
 }
 
+async function generateMinimax(prompt: string, options: AIRequestOptions): Promise<AIResponse> {
+    if (!options.apiKey) throw new Error('Minimax API key is required');
+
+    const response = await fetch('https://api.minimax.io/v1/text/chatcompletion_v2', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${options.apiKey}`,
+        },
+        body: JSON.stringify({
+            model: options.model || 'MiniMax-M1',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: options.temperature ?? 0.7,
+            max_tokens: options.maxTokens,
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Minimax error: ${error.base_resp?.status_msg || response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+        text: data.choices[0].message.content,
+        usage: {
+            promptTokens: data.usage?.prompt_tokens ?? 0,
+            completionTokens: data.usage?.completion_tokens ?? 0,
+            totalTokens: data.usage?.total_tokens ?? 0,
+        }
+    };
+}
+
+async function generateKimi(prompt: string, options: AIRequestOptions): Promise<AIResponse> {
+    if (!options.apiKey) throw new Error('Kimi API key is required');
+
+    const response = await fetch('https://api.moonshot.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${options.apiKey}`,
+        },
+        body: JSON.stringify({
+            model: options.model || 'kimi-k2-turbo-preview',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: options.temperature ?? 0.6,
+            max_tokens: options.maxTokens,
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Kimi error: ${error.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+        text: data.choices[0].message.content,
+        usage: {
+            promptTokens: data.usage?.prompt_tokens ?? 0,
+            completionTokens: data.usage?.completion_tokens ?? 0,
+            totalTokens: data.usage?.total_tokens ?? 0,
+        }
+    };
+}
+
 export async function generateChat(
     provider: AIProvider,
     messages: AIChatMessage[],
@@ -176,6 +246,10 @@ export async function generateChat(
             return await generateChatAnthropic(messages, options);
         case 'gemini':
             return await generateChatGemini(messages, options);
+        case 'minimax':
+            return await generateChatMinimax(messages, options);
+        case 'kimi':
+            return await generateChatKimi(messages, options);
         default:
             throw new Error(`Unsupported provider: ${provider}`);
     }
@@ -310,5 +384,71 @@ async function generateChatGemini(messages: AIChatMessage[], options: AIRequestO
     const data = await response.json();
     return {
         text: data.candidates[0].content.parts[0].text,
+    };
+}
+
+async function generateChatMinimax(messages: AIChatMessage[], options: AIRequestOptions): Promise<AIResponse> {
+    if (!options.apiKey) throw new Error('Minimax API key is required');
+
+    const response = await fetch('https://api.minimax.io/v1/text/chatcompletion_v2', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${options.apiKey}`,
+        },
+        body: JSON.stringify({
+            model: options.model || 'MiniMax-M1',
+            messages,
+            temperature: options.temperature ?? 0.7,
+            max_tokens: options.maxTokens,
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Minimax error: ${error.base_resp?.status_msg || response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+        text: data.choices[0].message.content,
+        usage: {
+            promptTokens: data.usage?.prompt_tokens ?? 0,
+            completionTokens: data.usage?.completion_tokens ?? 0,
+            totalTokens: data.usage?.total_tokens ?? 0,
+        }
+    };
+}
+
+async function generateChatKimi(messages: AIChatMessage[], options: AIRequestOptions): Promise<AIResponse> {
+    if (!options.apiKey) throw new Error('Kimi API key is required');
+
+    const response = await fetch('https://api.moonshot.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${options.apiKey}`,
+        },
+        body: JSON.stringify({
+            model: options.model || 'kimi-k2-turbo-preview',
+            messages,
+            temperature: options.temperature ?? 0.6,
+            max_tokens: options.maxTokens,
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`Kimi error: ${error.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+        text: data.choices[0].message.content,
+        usage: {
+            promptTokens: data.usage?.prompt_tokens ?? 0,
+            completionTokens: data.usage?.completion_tokens ?? 0,
+            totalTokens: data.usage?.total_tokens ?? 0,
+        }
     };
 }

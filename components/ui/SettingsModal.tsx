@@ -271,7 +271,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       model: e.target.value === 'ollama' ? 'llama3.2' :
                         e.target.value === 'openai' ? 'gpt-4o-mini' :
                           e.target.value === 'anthropic' ? 'claude-3-5-sonnet-20240620' :
-                            'gemini-2.0-flash'
+                            e.target.value === 'minimax' ? 'MiniMax-M1' :
+                              e.target.value === 'kimi' ? 'kimi-k2-turbo-preview' :
+                                'gemini-2.0-flash'
                     })}
                     className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none"
                   >
@@ -279,6 +281,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     <option value="openai">OpenAI (API)</option>
                     <option value="anthropic">Anthropic (API)</option>
                     <option value="gemini">Google Gemini (API)</option>
+                    <option value="minimax">Minimax (API)</option>
+                    <option value="kimi">Kimi / Moonshot (API)</option>
                   </select>
                 </div>
 

@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
-    const selectedModel = model || (provider === 'ollama' ? 'llama3.2' : 'gpt-4o-mini');
+    const selectedModel = model || (provider === 'ollama' ? 'llama3.2' : 'gpt-4.1');
     const lang = language || 'English';
 
     // Build prompt based on mode

@@ -489,7 +489,7 @@ export default function LandingPage() {
               with zero-cloud AI summarization powered by Ollama.
             </p>
             <div className="hero-buttons">
-              <a className="btn-primary" href="/dashboard">
+              <a className="btn-primary" href="/dashboard" target="_blank" rel="noopener noreferrer">
                 Live Preview
               </a>
               <a className="btn-secondary" href="#deploy">

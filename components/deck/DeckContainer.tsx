@@ -20,14 +20,18 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { useDeckStore, DEFAULT_COLUMN_WIDTH } from '@/lib/store';
 import { useSettingsStore } from '@/lib/settings-store';
+import { useArticlesStore } from '@/lib/articles-store';
 import { Article } from '@/lib/types';
 import { Column } from './Column';
+import { ReadingColumn } from './ReadingColumn';
 import { Plus } from 'lucide-react';
+import React from 'react';
 
 interface DeckContainerProps {
   onAddColumn: () => void;
   onArticleClick: (article: Article) => void;
-  selectedArticleId: string | null;
+  onCloseArticle: () => void;
+  selectedArticle: Article | null;
   refreshTrigger: number;
 }
 
@@ -69,9 +73,12 @@ function SortableColumn({ column, onArticleClick, selectedArticleId, refreshTrig
   );
 }
 
-export function DeckContainer({ onAddColumn, onArticleClick, selectedArticleId, refreshTrigger }: DeckContainerProps) {
+export function DeckContainer({ onAddColumn, onArticleClick, onCloseArticle, selectedArticle, refreshTrigger }: DeckContainerProps) {
   const columns = useDeckStore((state) => state.columns);
   const reorderColumns = useDeckStore((state) => state.reorderColumns);
+  const articleToColumn = useArticlesStore((state) => state.articleToColumn);
+
+  const sourceColumnId = selectedArticle ? articleToColumn.get(selectedArticle.id) : null;
 
 
   const sensors = useSensors(
@@ -117,13 +124,20 @@ export function DeckContainer({ onAddColumn, onArticleClick, selectedArticleId, 
             strategy={horizontalListSortingStrategy}
           >
             {columns.map((column) => (
-              <SortableColumn
-                key={column.id}
-                column={column}
-                onArticleClick={onArticleClick}
-                selectedArticleId={selectedArticleId}
-                refreshTrigger={refreshTrigger}
-              />
+              <React.Fragment key={column.id}>
+                <SortableColumn
+                  column={column}
+                  onArticleClick={onArticleClick}
+                  selectedArticleId={selectedArticle?.id || null}
+                  refreshTrigger={refreshTrigger}
+                />
+                {selectedArticle && sourceColumnId === column.id && (
+                  <ReadingColumn
+                    article={selectedArticle}
+                    onClose={onCloseArticle}
+                  />
+                )}
+              </React.Fragment>
             ))}
           </SortableContext>
         </DndContext>

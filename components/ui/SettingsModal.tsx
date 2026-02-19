@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2, Save, Zap } from 'lucide-react';
+import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Coffee, Send, Plus, Trash2, Save, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSettingsStore, themes, getThemeById } from '@/lib/settings-store';
 import { useDeckStore } from '@/lib/store';
 import { useArticlesStore } from '@/lib/articles-store';
@@ -41,6 +41,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [aiSaved, setAiSaved] = useState(false);
   const [showTelegramToken, setShowTelegramToken] = useState(false);
   const [telegramSaved, setTelegramSaved] = useState(false);
+  const [showAllThemes, setShowAllThemes] = useState(false);
 
   const columns = useDeckStore((state) => state.columns);
   const articlesByColumn = useArticlesStore((state) => state.articlesByColumn);
@@ -218,7 +219,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <span>Color Theme</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {themes.map((theme) => (
+              {themes.slice(0, showAllThemes ? undefined : 4).map((theme) => (
                 <button
                   key={theme.id}
                   onClick={() => setTheme(theme.id)}
@@ -243,6 +244,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 </button>
               ))}
             </div>
+
+            {themes.length > 4 && (
+              <button
+                onClick={() => setShowAllThemes(!showAllThemes)}
+                className="w-full py-1 text-xs text-foreground-secondary hover:text-foreground flex items-center justify-center gap-1 transition-colors"
+              >
+                {showAllThemes ? (
+                  <>Show Less <ChevronUp className="w-3 h-3" /></>
+                ) : (
+                  <>Show All Themes ({themes.length - 4} more) <ChevronDown className="w-3 h-3" /></>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Auto Refresh Interval */}
@@ -657,8 +671,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         <button
                           onClick={handleSaveTelegram}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${telegramSaved
-                              ? 'bg-success text-white'
-                              : 'bg-sky-600 text-white hover:bg-sky-500'
+                            ? 'bg-success text-white'
+                            : 'bg-sky-600 text-white hover:bg-sky-500'
                             }`}
                         >
                           {telegramSaved ? (

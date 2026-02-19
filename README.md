@@ -153,6 +153,7 @@ rss-deck/
 - **UI Polish** - Added API key visibility toggle and removed deprecated sentiment analysis features.
 - **Intelligent Briefing** - AI acts as a "News Intelligence Officer", selecting strategic headlines and summarizing key topics (no stock noise).
 - **Telegram Formatting** - Switched to robust HTML messages with bot token management & testing UI.
+- **Visual Overhaul** - Added 6 new themes (Nord, Dracula, etc.) with dynamic font switching (Inter, Fira Code) and collapsible settings UI.
 
 ### v1.2.0 (Feb 2026)
 - **Inline Reading Column** - Article content now opens as a dedicated column next to the source feed, keeping all other columns visible

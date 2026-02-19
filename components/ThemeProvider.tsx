@@ -22,6 +22,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     root.style.setProperty('--accent', theme.accent);
     root.style.setProperty('--accent-hover', theme.accentHover);
     root.style.setProperty('--border', theme.border);
+    root.style.setProperty('--font-sans', theme.fontFamily || 'var(--font-dm-sans), sans-serif');
     root.setAttribute('data-theme', themeId);
 
     // Manage dark mode class for Tailwind

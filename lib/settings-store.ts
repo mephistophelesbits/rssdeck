@@ -13,6 +13,7 @@ export interface ThemeColors {
   accentHover: string;
   border: string;
   isDark: boolean;
+  fontFamily?: string;
 }
 
 export const themes: ThemeColors[] = [
@@ -28,6 +29,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#292524',
     border: '#d6d3cd',
     isDark: false,
+    fontFamily: 'var(--font-dm-sans), sans-serif',
   },
   {
     id: 'dark-blue',
@@ -41,6 +43,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#1a8cd8',
     border: '#38444d',
     isDark: true,
+    fontFamily: 'var(--font-dm-sans), sans-serif',
   },
   {
     id: 'ebook',
@@ -54,6 +57,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#4a86b0',
     border: '#cec9be',
     isDark: false,
+    fontFamily: 'var(--font-playfair), serif',
   },
   {
     id: 'cyberpunk',
@@ -67,6 +71,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#00f0ff',
     border: '#333333',
     isDark: true,
+    fontFamily: 'var(--font-fira-code), monospace',
   },
   {
     id: 'cute',
@@ -80,6 +85,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#8c9eff',
     border: '#ffc0cb',
     isDark: false,
+    fontFamily: 'var(--font-dm-sans), sans-serif',
   },
   {
     id: 'hacker',
@@ -93,6 +99,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#ffffff',
     border: '#003b05',
     isDark: true,
+    fontFamily: 'var(--font-fira-code), monospace',
   },
   {
     id: 'ironman',
@@ -106,6 +113,7 @@ export const themes: ThemeColors[] = [
     accentHover: '#ffd600',
     border: '#00d2ff44',
     isDark: true,
+    fontFamily: 'var(--font-orbitron), sans-serif',
   },
   {
     id: 'ironman-hud',
@@ -119,6 +127,91 @@ export const themes: ThemeColors[] = [
     accentHover: '#ff6e40',
     border: '#ff3d0044',
     isDark: true,
+    fontFamily: 'var(--font-orbitron), sans-serif',
+  },
+  {
+    id: 'nord',
+    name: 'Nord (Arctic)',
+    background: '#2e3440',
+    backgroundSecondary: '#3b4252',
+    backgroundTertiary: '#434c5e',
+    foreground: '#d8dee9',
+    foregroundSecondary: '#88c0d0',
+    accent: '#88c0d0',
+    accentHover: '#81a1c1',
+    border: '#4c566a',
+    isDark: true,
+    fontFamily: 'var(--font-inter), sans-serif',
+  },
+  {
+    id: 'dracula',
+    name: 'Dracula',
+    background: '#282a36',
+    backgroundSecondary: '#44475a',
+    backgroundTertiary: '#6272a4',
+    foreground: '#f8f8f2',
+    foregroundSecondary: '#bd93f9',
+    accent: '#ff79c6',
+    accentHover: '#ff92d0',
+    border: '#6272a4',
+    isDark: true,
+    fontFamily: 'var(--font-fira-code), monospace',
+  },
+  {
+    id: 'midnight',
+    name: 'Midnight Pro',
+    background: '#0f172a',
+    backgroundSecondary: '#1e293b',
+    backgroundTertiary: '#334155',
+    foreground: '#f8fafc',
+    foregroundSecondary: '#94a3b8',
+    accent: '#38bdf8',
+    accentHover: '#0ea5e9',
+    border: '#334155',
+    isDark: true,
+    fontFamily: 'var(--font-inter), sans-serif',
+  },
+  {
+    id: 'sunset',
+    name: 'Sunset',
+    background: '#1c1917',
+    backgroundSecondary: '#292524',
+    backgroundTertiary: '#44403c',
+    foreground: '#fafaf9',
+    foregroundSecondary: '#a8a29e',
+    accent: '#fb923c',
+    accentHover: '#f97316',
+    border: '#44403c',
+    isDark: true,
+    fontFamily: 'var(--font-dm-sans), sans-serif',
+  },
+  {
+    id: 'terminal',
+    name: 'Retro Terminal',
+    background: '#1a1a1a',
+    backgroundSecondary: '#2b2b2b',
+    backgroundTertiary: '#000000',
+    foreground: '#ffb000',
+    foregroundSecondary: '#cc8800',
+    accent: '#ffcc00',
+    accentHover: '#ffe680',
+    border: '#ffb00044',
+    isDark: true,
+    fontFamily: 'var(--font-fira-code), monospace',
+  },
+  {
+    id: 'forest',
+    name: 'Deep Forest',
+    background: '#1a2f1c',
+    backgroundSecondary: '#243e26',
+    backgroundTertiary: '#2f5032',
+    foreground: '#e8f5e9',
+    foregroundSecondary: '#a5d6a7',
+    accent: '#4caf50',
+    accentHover: '#66bb6a',
+    border: '#2e7d32',
+    isDark: true,
+    fontFamily: 'var(--font-dm-sans), sans-serif',
   },
 ];
 

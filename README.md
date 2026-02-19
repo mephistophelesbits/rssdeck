@@ -151,6 +151,8 @@ rss-deck/
 - **Connection Testing** - "Test AI" button to verify your API key and network connection (with timeout protection).
 - **Latest Models** - Updated default models to Feb 2026 state-of-the-art (GPT-4.1, Claude 3.6 Sonnet, Gemini 3.0 Pro).
 - **UI Polish** - Added API key visibility toggle and removed deprecated sentiment analysis features.
+- **Intelligent Briefing** - AI acts as a "News Intelligence Officer", selecting strategic headlines and summarizing key topics (no stock noise).
+- **Telegram Formatting** - Switched to robust HTML messages with bot token management & testing UI.
 
 ### v1.2.0 (Feb 2026)
 - **Inline Reading Column** - Article content now opens as a dedicated column next to the source feed, keeping all other columns visible

@@ -39,6 +39,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const [aiTestStatus, setAiTestStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [aiTestMessage, setAiTestMessage] = useState<string | null>(null);
   const [aiSaved, setAiSaved] = useState(false);
+  const [showTelegramToken, setShowTelegramToken] = useState(false);
+  const [telegramSaved, setTelegramSaved] = useState(false);
 
   const columns = useDeckStore((state) => state.columns);
   const articlesByColumn = useArticlesStore((state) => state.articlesByColumn);
@@ -177,6 +179,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     // Settings are already persisted via Zustand, just show confirmation
     setAiSaved(true);
     setTimeout(() => setAiSaved(false), 2000);
+  };
+
+  const handleSaveTelegram = () => {
+    setTelegramSaved(true);
+    setTimeout(() => setTelegramSaved(false), 2000);
   };
 
   if (!isOpen) return null;
@@ -612,13 +619,23 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         <label className="text-xs font-medium text-foreground-secondary">
                           Bot Token
                         </label>
-                        <input
-                          type="password"
-                          value={briefingSettings.telegramToken}
-                          onChange={(e) => setBriefingSettings({ telegramToken: e.target.value })}
-                          placeholder="123456:ABC-DEF..."
-                          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showTelegramToken ? 'text' : 'password'}
+                            value={briefingSettings.telegramToken}
+                            onChange={(e) => setBriefingSettings({ telegramToken: e.target.value })}
+                            placeholder="123456:ABC-DEF..."
+                            className="w-full px-3 py-2 pr-9 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowTelegramToken(!showTelegramToken)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-secondary hover:text-foreground transition-colors"
+                            title={showTelegramToken ? 'Hide Token' : 'Show Token'}
+                          >
+                            {showTelegramToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-foreground-secondary">
@@ -636,38 +653,54 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         Talk to @BotFather to get a token and @userinfobot to get your ID.
                       </p>
 
-                      <button
-                        onClick={handleSendTestBriefing}
-                        disabled={isTestingBriefing || !briefingSettings.telegramToken || !briefingSettings.telegramChatId}
-                        className={cn(
-                          "w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-md",
-                          testStatus === 'success' ? "bg-success text-white" :
-                            testStatus === 'error' ? "bg-error text-white" :
-                              "bg-sky-600 hover:bg-sky-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                        )}
-                      >
-                        {isTestingBriefing ? (
-                          <>
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            Sending Test...
-                          </>
-                        ) : testStatus === 'success' ? (
-                          <>
-                            <CheckCircle className="w-3 h-3" />
-                            Sent Successfully!
-                          </>
-                        ) : testStatus === 'error' ? (
-                          <>
-                            <XCircle className="w-3 h-3" />
-                            Failed to Send
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-3 h-3" />
-                            Send Test Briefing
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={handleSaveTelegram}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${telegramSaved
+                              ? 'bg-success text-white'
+                              : 'bg-sky-600 text-white hover:bg-sky-500'
+                            }`}
+                        >
+                          {telegramSaved ? (
+                            <><CheckCircle className="w-3.5 h-3.5" /> Saved!</>
+                          ) : (
+                            <><Save className="w-3.5 h-3.5" /> Save</>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={handleSendTestBriefing}
+                          disabled={isTestingBriefing || !briefingSettings.telegramToken || !briefingSettings.telegramChatId}
+                          className={cn(
+                            "flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all border",
+                            testStatus === 'success' ? "border-success text-success bg-success/10" :
+                              testStatus === 'error' ? "border-error text-error bg-error/10" :
+                                "border-border text-foreground-secondary hover:text-foreground hover:border-foreground-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                          )}
+                        >
+                          {isTestingBriefing ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              Testing...
+                            </>
+                          ) : testStatus === 'success' ? (
+                            <>
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              Sent!
+                            </>
+                          ) : testStatus === 'error' ? (
+                            <>
+                              <XCircle className="w-3.5 h-3.5" />
+                              Failed
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-3.5 h-3.5" />
+                              Test Connection
+                            </>
+                          )}
+                        </button>
+                      </div>
 
                       {errorMessage && (
                         <p className="text-[10px] text-error font-medium animate-in fade-in slide-in-from-top-1 px-1">

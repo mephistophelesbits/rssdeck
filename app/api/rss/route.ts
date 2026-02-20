@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     const items: Article[] = feed.items.map((item) => {
       const itemRecord = item as unknown as Record<string, unknown>;
       return {
-        id: item.guid || item.link || crypto.randomUUID(),
+        id: item.guid || item.link || generateId(),
         title: item.title || 'Untitled',
         link: item.link || '',
         pubDate: item.pubDate || item.isoDate || new Date().toISOString(),

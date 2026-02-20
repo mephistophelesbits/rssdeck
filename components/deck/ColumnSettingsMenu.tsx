@@ -114,7 +114,7 @@ export function ColumnSettingsMenu({ column }: ColumnSettingsMenuProps) {
       if (data.error) throw new Error(data.error);
 
       addFeedToColumn(column.id, {
-        id: crypto.randomUUID(),
+        id: generateId(),
         url: newSourceUrl,
         title: data.title || 'Custom Feed',
       });

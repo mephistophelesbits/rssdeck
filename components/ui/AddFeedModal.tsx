@@ -6,7 +6,7 @@ import { useDeckStore, DEFAULT_COLUMN_WIDTH } from '@/lib/store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { categories, Category } from '@/lib/categories';
 import { parseOPML, isValidOPML, OPMLFeed } from '@/lib/opml';
-import { cn } from '@/lib/utils';
+import { cn, generateId } from '@/lib/utils';
 
 interface AddFeedModalProps {
   isOpen: boolean;
@@ -60,12 +60,12 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       if (targetColumn === 'new') {
         // Create new column
         addColumn({
-          id: crypto.randomUUID(),
+          id: generateId(),
           title: feedTitle,
           type: 'single-feed',
           sources: [
             {
-              id: crypto.randomUUID(),
+              id: generateId(),
               url: url,
               title: feedTitle,
             },
@@ -79,7 +79,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       } else {
         // Add to existing column
         addFeedToColumn(targetColumn, {
-          id: crypto.randomUUID(),
+          id: generateId(),
           url: url,
           title: feedTitle,
         });
@@ -112,7 +112,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
         type: 'category',
         sources: category.feeds.map((feed) => ({
           ...feed,
-          id: crypto.randomUUID(),
+          id: generateId(),
         })),
         settings: {
           refreshInterval: defaultRefreshInterval,
@@ -125,7 +125,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       category.feeds.forEach((feed) => {
         addFeedToColumn(targetColumn, {
           ...feed,
-          id: crypto.randomUUID(),
+          id: generateId(),
         });
       });
     }
@@ -174,7 +174,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
         title: 'Imported Feeds',
         type: 'unified',
         sources: opmlFeeds.map((feed) => ({
-          id: crypto.randomUUID(),
+          id: generateId(),
           url: feed.url,
           title: feed.title,
         })),
@@ -187,7 +187,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
     } else {
       opmlFeeds.forEach((feed) => {
         addFeedToColumn(targetColumn, {
-          id: crypto.randomUUID(),
+          id: generateId(),
           url: feed.url,
           title: feed.title,
         });
@@ -218,7 +218,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
         title: category,
         type: 'unified',
         sources: feeds.map((feed) => ({
-          id: crypto.randomUUID(),
+          id: generateId(),
           url: feed.url,
           title: feed.title,
         })),

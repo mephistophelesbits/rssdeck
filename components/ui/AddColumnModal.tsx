@@ -21,13 +21,13 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
   const [url, setUrl] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // OPML state
   const [opmlFeeds, setOpmlFeeds] = useState<OPMLFeed[]>([]);
   const [opmlError, setOpmlError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const addColumn = useDeckStore((state) => state.addColumn);
   const { defaultRefreshInterval, defaultViewMode } = useSettingsStore();
 
@@ -69,8 +69,8 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
 
       setUrl('');
       onClose();
-    } catch (err) {
-      setError('Failed to validate feed. Please check the URL.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to validate feed. Please check the URL.');
       console.error(err);
     } finally {
       setIsValidating(false);
@@ -99,37 +99,37 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
   const handleOPMLFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     setOpmlError(null);
     setOpmlFeeds([]);
-    
+
     try {
       const text = await file.text();
-      
+
       if (!isValidOPML(text)) {
         setOpmlError('Invalid OPML file. Please check the format.');
         return;
       }
-      
+
       const result = parseOPML(text);
-      
+
       if (result.feeds.length === 0) {
         setOpmlError('No RSS feeds found in this OPML file.');
         return;
       }
-      
+
       setOpmlFeeds(result.feeds);
     } catch (err) {
       setOpmlError('Failed to parse OPML file.');
       console.error(err);
     }
   };
-  
+
   const handleImportOPML = () => {
     if (opmlFeeds.length === 0) return;
-    
+
     setIsImporting(true);
-    
+
     // Add all feeds as a single column
     addColumn({
       id: generateId(),
@@ -146,17 +146,17 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
       },
       width: DEFAULT_COLUMN_WIDTH,
     });
-    
+
     setIsImporting(false);
     setOpmlFeeds([]);
     onClose();
   };
-  
+
   const handleImportAllAsColumns = () => {
     if (opmlFeeds.length === 0) return;
-    
+
     setIsImporting(true);
-    
+
     // Group by category
     const byCategory = new Map<string, OPMLFeed[]>();
     opmlFeeds.forEach((feed) => {
@@ -164,7 +164,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
       if (!byCategory.has(cat)) byCategory.set(cat, []);
       byCategory.get(cat)!.push(feed);
     });
-    
+
     // Add each category as a column
     byCategory.forEach((feeds, category) => {
       addColumn({
@@ -183,7 +183,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
         width: DEFAULT_COLUMN_WIDTH,
       });
     });
-    
+
     setIsImporting(false);
     setOpmlFeeds([]);
     onClose();
@@ -271,7 +271,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
               ))}
             </div>
           )}
-          
+
           {activeTab === 'url' && (
             <div className="space-y-4">
               <div>
@@ -319,7 +319,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
               </p>
             </div>
           )}
-          
+
           {activeTab === 'opml' && (
             /* OPML Import Tab */
             <div className="space-y-4">
@@ -345,11 +345,11 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                   Select File
                 </button>
               </div>
-              
+
               {opmlError && (
                 <p className="text-sm text-error text-center">{opmlError}</p>
               )}
-              
+
               {opmlFeeds.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -366,7 +366,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                       Clear
                     </button>
                   </div>
-                  
+
                   <div className="max-h-48 overflow-y-auto space-y-2 border border-border rounded-lg p-3">
                     {opmlFeeds.slice(0, 10).map((feed, idx) => (
                       <div key={idx} className="text-sm">
@@ -382,7 +382,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                       </p>
                     )}
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <button
                       onClick={handleImportOPML}
@@ -406,7 +406,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                   </div>
                 </div>
               )}
-              
+
               <p className="text-xs text-foreground-secondary text-center">
                 Import feeds from Feedly, Inoreader, Google Reader, etc.
               </p>

@@ -96,10 +96,10 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('RSS fetch error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch or parse RSS feed' },
+      { error: error.message || 'Failed to fetch or parse RSS feed' },
       { status: 500 }
     );
   }

@@ -95,8 +95,8 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       setUrl('');
       setTargetColumn('new');
       onClose();
-    } catch (err) {
-      setError('Failed to validate feed. Please check the URL.');
+    } catch (err: any) {
+      setError(err.message || 'Failed to validate feed. Please check the URL.');
       console.error(err);
     } finally {
       setIsValidating(false);

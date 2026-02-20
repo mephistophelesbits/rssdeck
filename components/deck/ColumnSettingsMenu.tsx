@@ -121,8 +121,8 @@ export function ColumnSettingsMenu({ column }: ColumnSettingsMenuProps) {
 
       setNewSourceUrl('');
       setIsAddingSource(false);
-    } catch (err) {
-      setError('Failed to validate feed');
+    } catch (err: any) {
+      setError(err.message || 'Failed to validate feed');
       console.error(err);
     } finally {
       setIsValidating(false);

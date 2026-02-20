@@ -150,6 +150,7 @@ rss-deck/
 - **Similar Posts** - Added a zero-API-cost client-side text similarity engine. Reading any article will instantly display related articles from your feeds at the bottom.
 - **Custom Prompts** - Added customizable AI instructions in the Settings Modal for both Article Summarization ("Research") and Morning Briefings.
 - **Tabbed Settings UI** - Grouped Settings into General, AI Assistant, and Morning Briefing tabs for a much cleaner experience.
+- **NAS & HTTP Support** - Fixed an issue preventing new feeds from being added over non-secure (HTTP) environments like Synology Docker containers by replacing `crypto.randomUUID()` with a wider-compatible ID generator. Also surfaced detailed DNS/network error messages to the UI to help debug connection issues.
 
 ### v1.3.0 (Feb 2026)
 - **Smart AI Settings** - Configure separate API keys for OpenAI, Anthropic, Gemini, deepseek etc. Keys are automatically switched when you change providers.

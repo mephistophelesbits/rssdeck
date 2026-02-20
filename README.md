@@ -146,6 +146,11 @@ rss-deck/
 
 ## 📋 Changelog
 
+### v1.4.0 (Feb 2026)
+- **Similar Posts** - Added a zero-API-cost client-side text similarity engine. Reading any article will instantly display related articles from your feeds at the bottom.
+- **Custom Prompts** - Added customizable AI instructions in the Settings Modal for both Article Summarization ("Research") and Morning Briefings.
+- **Tabbed Settings UI** - Grouped Settings into General, AI Assistant, and Morning Briefing tabs for a much cleaner experience.
+
 ### v1.3.0 (Feb 2026)
 - **Smart AI Settings** - Configure separate API keys for OpenAI, Anthropic, Gemini, deepseek etc. Keys are automatically switched when you change providers.
 - **Connection Testing** - "Test AI" button to verify your API key and network connection (with timeout protection).

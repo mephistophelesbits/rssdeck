@@ -84,6 +84,7 @@ export function BriefingManager() {
                             sourceTitle: a.sourceTitle
                         })),
                         aiSettings,
+                        briefingSettings,
                         telegramSettings: {
                             enabled: briefingSettings.telegramEnabled,
                             token: briefingSettings.telegramToken,

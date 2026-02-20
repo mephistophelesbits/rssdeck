@@ -68,8 +68,9 @@ export async function POST(req: NextRequest) {
       provider = 'ollama',
       apiKey,
       language,
-      ollamaUrl
-    } = body;
+      ollamaUrl,
+      customSummaryPrompt
+    } = body as any; // Cast as any since we added customSummaryPrompt
 
     if (!task || !content) {
       return NextResponse.json(
@@ -91,7 +92,14 @@ export async function POST(req: NextRequest) {
     // Build prompt based on task
     let prompt: string;
     if (task === 'summarize') {
-      prompt = buildSummarizePrompt(title || '', content, lang);
+      if (customSummaryPrompt && customSummaryPrompt.trim().length > 0) {
+        prompt = customSummaryPrompt.replace('{{content}}', content).replace('{{title}}', title || '');
+        if (!prompt.includes(content)) {
+          prompt += `\n\nTitle: ${title}\nContent: ${content}`;
+        }
+      } else {
+        prompt = buildSummarizePrompt(title || '', content, lang);
+      }
     } else if (task === 'translate') {
       prompt = buildTranslatePrompt(content, body.targetLanguage || 'Chinese');
     } else {

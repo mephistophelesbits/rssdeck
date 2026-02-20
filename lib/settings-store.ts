@@ -240,6 +240,7 @@ interface SettingsState {
     apiKeys: Record<string, string>;
     model: string;
     language: string;
+    customSummaryPrompt?: string;
   };
   setAiSettings: (settings: Partial<SettingsState['aiSettings']>) => void;
 
@@ -250,6 +251,7 @@ interface SettingsState {
     telegramToken: string;
     telegramChatId: string;
     lastGenerated: string | null;
+    customPrompt?: string;
   };
   setBriefingSettings: (settings: Partial<SettingsState['briefingSettings']>) => void;
 }
@@ -272,6 +274,7 @@ export const useSettingsStore = create<SettingsState>()(
         apiKeys: {},
         model: 'llama3.2',
         language: 'Original Language',
+        customSummaryPrompt: '',
       },
 
       setTheme: (themeId) => set({ themeId }),
@@ -292,6 +295,7 @@ export const useSettingsStore = create<SettingsState>()(
         telegramToken: '',
         telegramChatId: '',
         lastGenerated: null,
+        customPrompt: '',
       },
       setBriefingSettings: (newSettings) =>
         set((state) => ({

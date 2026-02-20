@@ -99,7 +99,8 @@ export async function POST(req: NextRequest) {
       ollamaUrl,
       enhancedMode,
       relatedArticles,
-      webResults
+      webResults,
+      customSummaryPrompt
     } = await req.json();
 
     if (!content) {
@@ -109,10 +110,18 @@ export async function POST(req: NextRequest) {
     const selectedModel = model || (provider === 'ollama' ? 'llama3.2' : 'gpt-4.1');
     const lang = language || 'English';
 
-    // Build prompt based on mode
-    const prompt = enhancedMode
-      ? buildEnhancedPrompt(title, content, lang, relatedArticles || [], webResults || [])
-      : buildSimplePrompt(title, content, lang);
+    let prompt = '';
+    if (customSummaryPrompt && customSummaryPrompt.trim().length > 0) {
+      prompt = customSummaryPrompt.replace('{{content}}', content).replace('{{title}}', title || '');
+      // Fallback in case they didn't include the variables
+      if (!prompt.includes(content)) {
+        prompt += `\n\nTitle: ${title}\nContent: ${content}`;
+      }
+    } else {
+      prompt = enhancedMode
+        ? buildEnhancedPrompt(title, content, lang, relatedArticles || [], webResults || [])
+        : buildSimplePrompt(title, content, lang);
+    }
 
     const result = await generateText(provider as AIProvider, prompt, {
       model: selectedModel,

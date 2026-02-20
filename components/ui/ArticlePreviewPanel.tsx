@@ -99,6 +99,9 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
   const [isTranslating, setIsTranslating] = useState(false);
   const [showTranslated, setShowTranslated] = useState(false);
 
+  // Similar Posts state
+  const [similarArticles, setSimilarArticles] = useState<RelatedArticle[]>([]);
+
   // Auto-scroll chat to bottom when messages change or while typing
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -122,6 +125,7 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
       setTranslatedSummary(null);
       setIsTranslating(false);
       setShowTranslated(false);
+      setSimilarArticles([]);
       return;
     }
 
@@ -152,6 +156,17 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
       setPhase('idle');
     }
     setSummaryError(null);
+
+    // Compute basic similar articles immediately upon opening
+    try {
+      const related = findRelatedArticles(article, articlesByColumn, {
+        maxResults: 5,
+        minScore: 0.1,
+      });
+      setSimilarArticles(related);
+    } catch {
+      setSimilarArticles([]);
+    }
 
     // Try to load cached chat
     const cachedChat = getCachedChatMessages(article.id);
@@ -978,6 +993,38 @@ export function ArticlePreviewPanel({ article, onClose }: ArticlePreviewPanelPro
             <p className="text-foreground-secondary italic">
               No content preview available.
             </p>
+          )}
+
+          {/* Similar Posts Section */}
+          {similarArticles.length > 0 && (
+            <div className="mt-10 pt-6 border-t border-border">
+              <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+                <Newspaper className="w-5 h-5 text-accent" />
+                Similar Posts
+              </h3>
+              <div className="grid grid-cols-1 gap-3">
+                {similarArticles.map((ra) => (
+                  <a
+                    key={ra.article.id}
+                    href={ra.article.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-lg border border-border bg-background-tertiary hover:border-accent hover:bg-background-secondary transition-all flex flex-col gap-1"
+                  >
+                    <div className="text-sm font-semibold text-foreground line-clamp-2">
+                      {decodeHtml(ra.article.title)}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-foreground-secondary">
+                      <span className="font-medium text-accent truncate max-w-[150px]">
+                        {decodeHtml(ra.article.sourceTitle || 'Unknown')}
+                      </span>
+                      <span>•</span>
+                      <RelativeTime date={ra.article.pubDate} className="text-[10px]" />
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>

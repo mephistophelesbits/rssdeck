@@ -144,6 +144,21 @@ rss-deck/
 - **RSS**: Custom parser + Mozilla Readability
 - **Deployment**: Docker
 
+## 🦞 RSSdeck-MCP (For AI Agents)
+
+Looking to power your AI agent with RSS data? Check out **[RSSdeck-MCP](https://github.com/mephistophelesbits/rssdeck-mcp)** — an MCP server that provides token-efficient RSS summaries for AI agents.
+
+- **TL;DR Summaries** — Not full articles
+- **Relevance Scoring** — Filters by your interests
+- **Deduplication** — Removes duplicate stories
+- **Perfect for OpenClaw** and other AI agents
+
+```
+RSSdeck (Web UI) → Export OPML → RSSdeck-MCP → AI Agent
+```
+
+[Learn more →](https://github.com/mephistophelesbits/rssdeck-mcp)
+
 ## 📋 Changelog
 
 ### v1.4.0 (Feb 2026)

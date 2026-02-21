@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Rss, PlusCircle, Settings, Bookmark, RefreshCw, Clock, ChevronDown } from 'lucide-react';
+import { Rss, PlusCircle, Settings, Bookmark, RefreshCw, Clock, ChevronDown, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
 import { useSettingsStore, ArticleAgeFilter } from '@/lib/settings-store';
@@ -123,6 +123,50 @@ export function Sidebar({ onAddColumn, onOpenSettings, onRefreshAll }: SidebarPr
 
       {/* Bottom Actions */}
       <div className="flex flex-col items-center gap-2">
+        {/* Export OPML Button */}
+        <SidebarButton
+          icon={<Download className="w-5 h-5" />}
+          label="Export OPML"
+          onClick={() => {
+            // Get columns from localStorage
+            const stored = localStorage.getItem('rss-deck-storage');
+            if (stored) {
+              const data = JSON.parse(stored);
+              const columns = data.state?.columns || [];
+              
+              // Collect all unique feeds
+              const feedMap = new Map();
+              columns.forEach((col: any) => {
+                (col.sources || []).forEach((feed: any) => {
+                  if (!feedMap.has(feed.url)) {
+                    feedMap.set(feed.url, feed.title || feed.id);
+                  }
+                });
+              });
+              
+              // Generate OPML
+              const feeds = Array.from(feedMap.entries()).map(([url, title]) => ({ url, title }));
+              const opml = `<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+  <head>
+    <title>RSS Deck - Exported Feeds</title>
+  </head>
+  <body>
+${feeds.map((f: any) => `    <outline text="${f.title}" title="${f.title}" type="rss" xmlUrl="${f.url}" htmlUrl=""/>`).join('\n')}
+  </body>
+</opml>`;
+              
+              // Download
+              const blob = new Blob([opml], { type: 'application/xml' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'rssdeck-feeds.opml';
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+          }}
+        />
         <SidebarButton
           icon={<Settings className="w-5 h-5" />}
           label="Settings"

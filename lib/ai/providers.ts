@@ -20,6 +20,7 @@ export interface AIRequestOptions {
     baseUrl?: string;
     temperature?: number;
     maxTokens?: number;
+    systemPrompt?: string;
 }
 
 export async function generateText(
@@ -53,6 +54,7 @@ async function generateOllama(prompt: string, options: AIRequestOptions): Promis
         body: JSON.stringify({
             model: options.model,
             prompt: prompt,
+            system: options.systemPrompt,
             stream: false,
             options: {
                 temperature: options.temperature ?? 0.7,
@@ -81,7 +83,10 @@ async function generateOpenAI(prompt: string, options: AIRequestOptions): Promis
         },
         body: JSON.stringify({
             model: options.model || 'gpt-4.1',
-            messages: [{ role: 'user', content: prompt }],
+            messages: [
+                ...(options.systemPrompt ? [{ role: 'system', content: options.systemPrompt }] : []),
+                { role: 'user', content: prompt }
+            ],
             temperature: options.temperature ?? 0.7,
             max_tokens: options.maxTokens,
         }),
@@ -115,6 +120,7 @@ async function generateAnthropic(prompt: string, options: AIRequestOptions): Pro
         },
         body: JSON.stringify({
             model: options.model || 'claude-sonnet-4-6',
+            ...(options.systemPrompt ? { system: options.systemPrompt } : {}),
             messages: [{ role: 'user', content: prompt }],
             max_tokens: options.maxTokens || 1024,
             temperature: options.temperature ?? 0.7,
@@ -146,6 +152,7 @@ async function generateGemini(prompt: string, options: AIRequestOptions): Promis
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
+            ...(options.systemPrompt ? { system_instruction: { parts: [{ text: options.systemPrompt }] } } : {}),
             generationConfig: {
                 temperature: options.temperature ?? 0.7,
                 maxOutputTokens: options.maxTokens,
@@ -175,7 +182,10 @@ async function generateMinimax(prompt: string, options: AIRequestOptions): Promi
         },
         body: JSON.stringify({
             model: options.model || 'MiniMax-M2.5',
-            messages: [{ role: 'user', content: prompt }],
+            messages: [
+                ...(options.systemPrompt ? [{ role: 'system', content: options.systemPrompt }] : []),
+                { role: 'user', content: prompt }
+            ],
             temperature: options.temperature ?? 0.7,
             max_tokens: options.maxTokens,
         }),
@@ -208,7 +218,10 @@ async function generateKimi(prompt: string, options: AIRequestOptions): Promise<
         },
         body: JSON.stringify({
             model: options.model || 'kimi-k2.5',
-            messages: [{ role: 'user', content: prompt }],
+            messages: [
+                ...(options.systemPrompt ? [{ role: 'system', content: options.systemPrompt }] : []),
+                { role: 'user', content: prompt }
+            ],
             temperature: options.temperature ?? 0.6,
             max_tokens: options.maxTokens,
         }),

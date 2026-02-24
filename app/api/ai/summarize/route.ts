@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
     const lang = language || 'English';
 
     let prompt = '';
+    let systemPrompt: string | undefined;
     if (customSummaryPrompt && customSummaryPrompt.trim().length > 0) {
       prompt = customSummaryPrompt.replace('{{content}}', content).replace('{{title}}', title || '');
       // Fallback in case they didn't include the variables
@@ -118,6 +119,7 @@ export async function POST(req: NextRequest) {
         prompt += `\n\nTitle: ${title}\nContent: ${content}`;
       }
     } else {
+      systemPrompt = `You are a news summarization assistant. Your only job is to summarize the provided article. Output only the summary in the requested format. Do not add any preamble, sign-off, or commentary beyond the summary itself.`;
       prompt = enhancedMode
         ? buildEnhancedPrompt(title, content, lang, relatedArticles || [], webResults || [])
         : buildSimplePrompt(title, content, lang);
@@ -127,6 +129,8 @@ export async function POST(req: NextRequest) {
       model: selectedModel,
       apiKey,
       baseUrl: ollamaUrl || DEFAULT_OLLAMA_URL,
+      systemPrompt,
+      temperature: 0.3,
     });
 
     return NextResponse.json({

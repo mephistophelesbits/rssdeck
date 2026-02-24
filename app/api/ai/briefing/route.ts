@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     if (articles && articles.length > 0) {
       const articlesText = articles.map((a: any, i: number) => `${i + 1}. ${a.title}`).join('\n');
       let prompt = '';
+      let systemPrompt: string | undefined;
 
       if (briefingSettings?.customPrompt && briefingSettings.customPrompt.trim().length > 0) {
         prompt = briefingSettings.customPrompt.replace('{{articles}}', articlesText);
@@ -37,22 +38,24 @@ export async function POST(req: NextRequest) {
           prompt += `\n\nArticles:\n${articlesText}`;
         }
       } else {
-        prompt = `You are a News Intelligence Officer. Analyze the following headlines and provide a concise intelligence briefing.
+        systemPrompt = `You are a News Intelligence Officer. Your sole job is to produce concise, structured daily news briefings from a list of headlines. Always follow the requested output format exactly. Do not add any preamble, sign-off, or extra commentary beyond what is specified.`;
 
-1. Select the 3-5 most important or time-sensitive developments as "STRATEGIC HEADLINES".
-2. Group the rest into key topics and provide a "TOPIC SUMMARY" for each.
+        prompt = `Analyze the following headlines and produce today's briefing.
 
-Format:
+Instructions:
+1. Select the 3-5 most important or time-sensitive developments as STRATEGIC HEADLINES.
+2. Group the remaining headlines into key topics and write a one-line TOPIC SUMMARY for each group.
+
+Output format (follow this exactly):
+
 **🚨 STRATEGIC HEADLINES**
-- **[Headline]**: [One-line context]
+- **Headline text here**: One-line explanation of why it matters.
 
 **📂 TOPIC SUMMARIES**
-- **[Topic Category]**: [Concise summary of developments]
+- **Topic Category**: Concise summary of the related developments in this group.
 
 Headlines:
-${articlesText}
-
-Briefing:`;
+${articlesText}`;
       }
 
       const result = await generateText(
@@ -62,6 +65,9 @@ Briefing:`;
           apiKey: aiSettings?.apiKeys?.[aiSettings?.provider] || aiSettings?.apiKey,
           baseUrl: aiSettings?.ollamaUrl,
           model: aiSettings?.model || 'llama3.2',
+          systemPrompt,
+          temperature: 0.3,
+          maxTokens: 1024,
         }
       );
       briefing = result.text;

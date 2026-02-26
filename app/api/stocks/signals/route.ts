@@ -19,22 +19,22 @@ async function fetchStockPrice(symbol: string): Promise<any> {
         }
       }
     );
-    
+
     if (!response.ok) return null;
-    
+
     const data = await response.json();
     const result = data.chart?.result?.[0];
-    
+
     if (!result) return null;
-    
+
     const meta = result.meta;
     const timestamps = result.timestamp || [];
     const quotes = result.indicators.quote[0];
     const close = quotes.close || [];
-    
+
     // Get last 50 days for analysis
     const prices = close.slice(-50).filter((p: any) => p !== null);
-    
+
     return {
       symbol,
       currentPrice: meta.regularMarketPrice,
@@ -64,15 +64,15 @@ function calculateRSI(prices: number[], period: number = 14): number {
   for (let i = 1; i < prices.length; i++) {
     changes.push(prices[i] - prices[i - 1]);
   }
-  
+
   const gains = changes.slice(-period).filter(c => c > 0);
   const losses = changes.slice(-period).filter(c => c < 0).map(c => Math.abs(c));
-  
+
   const avgGain = gains.reduce((a, b) => a + b, 0) / period;
   const avgLoss = losses.reduce((a, b) => a + b, 0) / period;
-  
+
   if (avgLoss === 0) return 100;
-  
+
   const rs = avgGain / avgLoss;
   return 100 - (100 / (1 + rs));
 }
@@ -84,7 +84,7 @@ function calculateMACD(prices: number[]) {
   const macdLine = ema12 - ema26;
   const signalLine = calculateEMA([macdLine], 9);
   const histogram = macdLine - signalLine;
-  
+
   return { macdLine, signalLine, histogram };
 }
 
@@ -92,11 +92,11 @@ function calculateMACD(prices: number[]) {
 function calculateEMA(prices: number[], period: number): number {
   const k = 2 / (period + 1);
   let ema = prices[0];
-  
+
   for (let i = 1; i < prices.length; i++) {
     ema = prices[i] * k + ema * (1 - k);
   }
-  
+
   return ema;
 }
 
@@ -105,7 +105,7 @@ function findSupportResistance(prices: number[]): { support: number; resistance:
   const recentPrices = prices.slice(-20);
   const min = Math.min(...recentPrices);
   const max = Math.max(...recentPrices);
-  
+
   return {
     support: min,
     resistance: max
@@ -117,22 +117,22 @@ function analyzeStock(data: any): any {
   if (!data || data.prices.length < 50) {
     return null;
   }
-  
+
   const prices = data.prices;
   const currentPrice = data.currentPrice;
-  
+
   // Calculate indicators
   const sma20 = calculateSMA(prices, 20);
   const sma50 = calculateSMA(prices, 50);
   const rsi = calculateRSI(prices);
   const { macdLine, signalLine } = calculateMACD(prices);
   const { support, resistance } = findSupportResistance(prices);
-  
+
   // Count indicators agreeing
   let bullishSignals = 0;
   let bearishSignals = 0;
   const signals: string[] = [];
-  
+
   // Trend (SMA)
   if (currentPrice > sma50) {
     bullishSignals++;
@@ -141,7 +141,7 @@ function analyzeStock(data: any): any {
     bearishSignals++;
     signals.push('Below SMA50 🔴');
   }
-  
+
   if (currentPrice > sma20) {
     bullishSignals++;
     signals.push('Above SMA20 🟢');
@@ -149,18 +149,22 @@ function analyzeStock(data: any): any {
     bearishSignals++;
     signals.push('Below SMA20 🔴');
   }
-  
+
   // RSI
-  if (rsi < 35) {
-    bullishSignals++;
-    signals.push(`RSI Oversold (${rsi.toFixed(1)}) 🟢`);
-  } else if (rsi > 65) {
-    bearishSignals++;
-    signals.push(`RSI Overbought (${rsi.toFixed(1)}) 🔴`);
+  if (rsi !== undefined && rsi !== null) {
+    if (rsi < 35) {
+      bullishSignals++;
+      signals.push(`RSI Oversold (${rsi.toFixed(1)}) 🟢`);
+    } else if (rsi > 65) {
+      bearishSignals++;
+      signals.push(`RSI Overbought (${rsi.toFixed(1)}) 🔴`);
+    } else {
+      signals.push(`RSI Neutral (${rsi.toFixed(1)})`);
+    }
   } else {
-    signals.push(`RSI Neutral (${rsi.toFixed(1)})`);
+    signals.push('RSI Data Unavailable');
   }
-  
+
   // MACD
   if (macdLine > signalLine) {
     bullishSignals++;
@@ -169,19 +173,19 @@ function analyzeStock(data: any): any {
     bearishSignals++;
     signals.push('MACD Bearish 🔴');
   }
-  
+
   // Determine confidence and recommendation
   const totalSignals = bullishSignals + bearishSignals;
-  const confidence = totalSignals >= 3 ? 
-    (bullishSignals >= 3 ? 'HIGH' : bearishSignals >= 3 ? 'HIGH' : 'MEDIUM') : 
+  const confidence = totalSignals >= 3 ?
+    (bullishSignals >= 3 ? 'HIGH' : bearishSignals >= 3 ? 'HIGH' : 'MEDIUM') :
     'LOW';
-  
+
   // Calculate entry, stop, target
   let entry = currentPrice;
   let stop: number | null = null;
   let target: number | null = null;
   let recommendation: string = 'HOLD';
-  
+
   if (bullishSignals >= 2) {
     recommendation = 'BUY';
     entry = currentPrice;
@@ -193,10 +197,10 @@ function analyzeStock(data: any): any {
     stop = resistance * 1.05; // 5% above resistance
     target = support * 1.02; // Just above support
   }
-  
-  const riskReward = stop && target ? 
+
+  const riskReward = stop && target ?
     Math.abs((target - entry) / (entry - stop)) : 0;
-  
+
   return {
     symbol: data.symbol,
     currentPrice,
@@ -207,10 +211,10 @@ function analyzeStock(data: any): any {
     resistance,
     signals,
     recommendation,
-    entry: entry.toFixed(2),
-    stop: stop?.toFixed(2),
-    target: target?.toFixed(2),
-    riskReward: riskReward.toFixed(1),
+    entry: (entry ?? 0).toFixed(2),
+    stop: stop?.toFixed(2) ?? '-',
+    target: target?.toFixed(2) ?? '-',
+    riskReward: (riskReward ?? 0).toFixed(1),
     confidence
   };
 }
@@ -219,17 +223,17 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const symbols = searchParams.get('symbols')?.split(',') || WATCHLIST;
-    
+
     // Fetch all stocks
     const stocks = await Promise.all(
       symbols.map(s => fetchStockPrice(s.toUpperCase()))
     );
-    
+
     // Analyze each stock
     const signals = stocks
       .map(data => analyzeStock(data))
       .filter(s => s !== null);
-    
+
     return NextResponse.json({
       signals,
       timestamp: new Date().toISOString()
@@ -243,36 +247,40 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { symbols, telegramSettings } = await req.json();
-    
+
     // Fetch and analyze stocks
     const stocks = await Promise.all(
       (symbols || WATCHLIST).map((s: string) => fetchStockPrice(s.toUpperCase()))
     );
-    
+
     const signals = stocks
       .map(data => analyzeStock(data))
       .filter(s => s !== null);
-    
+
     // Format for Telegram
     let telegramMessage = `📊 *DAILY STOCK SIGNALS*\n\n`;
-    
+
     signals.forEach(s => {
       const emoji = s.recommendation === 'BUY' ? '🟢' : s.recommendation === 'SELL' ? '🔴' : '⚪';
-      
+
       telegramMessage += `${emoji} *${s.symbol}* \\- $${s.currentPrice}\\n`;
       telegramMessage += `Entry: \\$${s.entry} | Stop: \\$${s.stop} | Target: \\$${s.target}\\n`;
       telegramMessage += `Risk:Reward *1:${s.riskReward}* | Confidence: ${s.confidence}\\n`;
-      telegramMessage += `R\\.S\\.I: ${s.rsi.toFixed(1)} | SMA20: \\$${s.sma20.toFixed(2)} | SMA50: \\$${s.sma50.toFixed(2)}\\n`;
+      const rsiStr = s.rsi !== undefined && s.rsi !== null ? s.rsi.toFixed(1) : '-';
+      const sma20Str = s.sma20 !== undefined && s.sma20 !== null ? s.sma20.toFixed(2) : '-';
+      const sma50Str = s.sma50 !== undefined && s.sma50 !== null ? s.sma50.toFixed(2) : '-';
+
+      telegramMessage += `R\\.S\\.I: ${rsiStr} | SMA20: \\$${sma20Str} | SMA50: \\$${sma50Str}\\n`;
       telegramMessage += `──────────────────\\n`;
     });
-    
+
     telegramMessage += `_Signals generated at ${new Date().toLocaleTimeString()}_`;
-    
+
     // Push to Telegram if configured
     let telegramError = null;
     if (telegramSettings?.enabled && telegramSettings.token && telegramSettings.chatId) {
       const telegramUrl = `https://api.telegram.org/bot${telegramSettings.token}/sendMessage`;
-      
+
       try {
         const res = await fetch(telegramUrl, {
           method: 'POST',
@@ -283,7 +291,7 @@ export async function POST(req: NextRequest) {
             parse_mode: 'MarkdownV2'
           }),
         });
-        
+
         if (!res.ok) {
           telegramError = await res.text();
         }
@@ -291,8 +299,8 @@ export async function POST(req: NextRequest) {
         telegramError = err.message;
       }
     }
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       signals,
       telegramMessage,
       telegramError,

@@ -61,10 +61,10 @@ async function fetchYahooFinanceData(symbols: string[]): Promise<IndexData[]> {
 
       if (!meta || !quote) return null;
 
-      const currentPrice = meta.regularMarketPrice || meta.previousClose;
-      const previousClose = meta.chartPreviousClose || meta.previousClose;
+      const currentPrice = meta.regularMarketPrice || meta.previousClose || 0;
+      const previousClose = meta.chartPreviousClose || meta.previousClose || currentPrice || 1; // Avoid division by zero
       const change = currentPrice - previousClose;
-      const changePercent = (change / previousClose) * 100;
+      const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0;
 
       const indexInfo = INDICES.find((i) => i.symbol === symbol);
 

@@ -20,7 +20,9 @@ interface TickerResponse {
   lastUpdated: string;
 }
 
-function formatPrice(price: number): string {
+function formatPrice(price: number | undefined | null): string {
+  if (price === undefined || price === null) return '-';
+
   if (price >= 10000) {
     return price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   } else if (price >= 100) {
@@ -30,7 +32,11 @@ function formatPrice(price: number): string {
   }
 }
 
-function formatChange(change: number, percent: number): string {
+function formatChange(change: number | undefined | null, percent: number | undefined | null): string {
+  if (change === undefined || change === null || percent === undefined || percent === null) {
+    return '- (-%)';
+  }
+
   const sign = change >= 0 ? '+' : '';
   if (Math.abs(change) >= 100) {
     return `${sign}${change.toFixed(0)} (${sign}${percent.toFixed(2)}%)`;

@@ -129,6 +129,14 @@ export function isValidOPML(xmlString: string): boolean {
   return false;
 }
 
+function xmlAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 /**
  * Generate OPML XML from feeds
  */
@@ -147,18 +155,18 @@ export function generateOPML(feeds: OPMLFeed[], title: string = 'RSS Deck Export
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <opml version="2.0">
   <head>
-    <title>${title}</title>
+    <title>${xmlAttr(title)}</title>
     <dateCreated>${new Date().toISOString()}</dateCreated>
   </head>
   <body>`;
 
   categories.forEach((categoryFeeds, category) => {
     if (category !== 'Uncategorized') {
-      xml += `\n    <outline text="${category}" title="${category}">`;
+      xml += `\n    <outline text="${xmlAttr(category)}" title="${xmlAttr(category)}">`;
     }
 
     categoryFeeds.forEach((feed) => {
-      xml += `\n      <outline text="${feed.title}" title="${feed.title}" type="rss" xmlUrl="${feed.url}" htmlUrl=""/>`;
+      xml += `\n      <outline text="${xmlAttr(feed.title)}" title="${xmlAttr(feed.title)}" type="rss" xmlUrl="${xmlAttr(feed.url)}" htmlUrl=""/>`;
     });
 
     if (category !== 'Uncategorized') {

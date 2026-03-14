@@ -953,7 +953,9 @@ export function IntelligenceDashboard() {
             <div className="rounded-2xl border border-border bg-background p-3 2xl:h-[440px]">
               <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-3">Latest Snapshot</div>
               <div className="space-y-1.5 2xl:max-h-[388px] 2xl:overflow-y-auto pr-1">
-                {(overview?.trendSnapshots ?? []).map((snapshot) => (
+                {(overview?.trendSnapshots ?? []).map((snapshot, _, arr) => {
+                  const maxVal = Math.max(...arr.map((s) => s.value), 1);
+                  return (
                   <div key={snapshot.label} className="space-y-1">
                     <div className="flex items-center justify-between gap-3 text-sm">
                       <button
@@ -980,11 +982,12 @@ export function IntelligenceDashboard() {
                     <div className="h-2 rounded-full bg-background-secondary overflow-hidden">
                       <div
                         className="h-full rounded-full bg-accent"
-                        style={{ width: `${Math.max(8, Math.min(100, snapshot.value * 10))}%` }}
+                        style={{ width: `${Math.max(8, Math.round((snapshot.value / maxVal) * 100))}%` }}
                       />
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
             <TrendPanel

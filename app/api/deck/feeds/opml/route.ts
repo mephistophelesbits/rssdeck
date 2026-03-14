@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server';
 import { getDeckState } from '@/lib/server/deck-repository';
-import { generateOPML } from '@/lib/opml';
+import { generateOPML, OPMLFeed } from '@/lib/opml';
 
 export async function GET() {
-  const { savedFeeds } = getDeckState();
-  const body = generateOPML(
-    savedFeeds.map((feed) => ({
-      title: feed.title,
-      url: feed.url,
-    })),
-    'RSS Deck Feed Export'
+  const { columns } = getDeckState();
+
+  const feeds: OPMLFeed[] = columns.flatMap((column) =>
+    column.sources.map((source) => ({
+      title: source.title,
+      url: source.url,
+      category: column.title,
+    }))
   );
+
+  const body = generateOPML(feeds, 'RSS Deck Feed Export');
 
   return new NextResponse(body, {
     headers: {

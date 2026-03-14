@@ -190,57 +190,41 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
     setIsImporting(true);
 
     try {
-      const sources = opmlFeeds.map((feed) => buildFeed(feed.url, feed.title));
+      const hasCategories = opmlFeeds.some((f) => f.category);
 
-      if (targetColumn === 'new') {
+      if (targetColumn === 'new' && hasCategories) {
+        // Create one column per category
+        const byCategory = new Map<string, OPMLFeed[]>();
+        opmlFeeds.forEach((feed) => {
+          const category = feed.category || 'Imported';
+          if (!byCategory.has(category)) byCategory.set(category, []);
+          byCategory.get(category)!.push(feed);
+        });
+        for (const [category, feeds] of byCategory.entries()) {
+          await createColumnRequest(
+            buildColumnPayload(
+              generateId(),
+              category,
+              'unified',
+              feeds.map((feed) => buildFeed(feed.url, feed.title))
+            )
+          );
+        }
+        applyDeckState(await fetchDeckState());
+      } else if (targetColumn === 'new') {
         applyDeckState(await createColumnRequest(
-          buildColumnPayload(generateId(), 'Imported Feeds', 'unified', sources)
+          buildColumnPayload(generateId(), 'Imported Feeds', 'unified', opmlFeeds.map((feed) => buildFeed(feed.url, feed.title)))
         ));
       } else {
         const column = requireTargetColumn();
         applyDeckState(await updateColumnRequest(targetColumn, {
-          sources: [...column.sources, ...sources],
+          sources: [...column.sources, ...opmlFeeds.map((feed) => buildFeed(feed.url, feed.title))],
         }));
       }
 
       setOpmlFeeds([]);
       setOpmlError(null);
       setTargetColumn('new');
-      onClose();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  const handleImportAsColumns = async () => {
-    if (opmlFeeds.length === 0) return;
-
-    setIsImporting(true);
-
-    try {
-      const byCategory = new Map<string, OPMLFeed[]>();
-      opmlFeeds.forEach((feed) => {
-        const category = feed.category || 'Imported';
-        if (!byCategory.has(category)) byCategory.set(category, []);
-        byCategory.get(category)!.push(feed);
-      });
-
-      for (const [category, feeds] of byCategory.entries()) {
-        await createColumnRequest(
-          buildColumnPayload(
-            generateId(),
-            category,
-            'unified',
-            feeds.map((feed) => buildFeed(feed.url, feed.title))
-          )
-        );
-      }
-
-      applyDeckState(await fetchDeckState());
-      setOpmlFeeds([]);
-      setOpmlError(null);
       onClose();
     } catch (error) {
       console.error(error);
@@ -521,37 +505,29 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => void handleImportOPML()}
-                      disabled={isImporting}
-                      className="flex-1 py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      {isImporting ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Check className="w-4 h-4" />
-                      )}
-                      {targetColumn === 'new' ? 'Import as Column' : 'Add to Column'}
-                    </button>
-                    {targetColumn === 'new' && (
-                      <button
-                        onClick={() => void handleImportAsColumns()}
-                        disabled={isImporting}
-                        className="flex-1 py-2.5 border-2 border-accent hover:bg-accent-hover hover:text-white disabled:opacity-50 text-accent font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-                      >
-                        {isImporting ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Columns className="w-4 h-4" />
-                        )}
-                        Import as Multiple Columns
-                      </button>
+                  <button
+                    onClick={() => void handleImportOPML()}
+                    disabled={isImporting}
+                    className="w-full py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isImporting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : opmlFeeds.some((f) => f.category) && targetColumn === 'new' ? (
+                      <Columns className="w-4 h-4" />
+                    ) : (
+                      <Check className="w-4 h-4" />
                     )}
-                  </div>
+                    {targetColumn !== 'new'
+                      ? 'Add to Column'
+                      : opmlFeeds.some((f) => f.category)
+                      ? `Import as ${new Set(opmlFeeds.map((f) => f.category).filter(Boolean)).size} Columns`
+                      : 'Import as New Column'}
+                  </button>
 
                   <p className="text-xs text-foreground-secondary text-center">
-                    Choose to import all feeds into one column or create separate columns by category
+                    {opmlFeeds.some((f) => f.category) && targetColumn === 'new'
+                      ? 'Each category in the OPML will become a separate column'
+                      : 'All feeds will be added to a single column'}
                   </p>
                 </div>
               )}

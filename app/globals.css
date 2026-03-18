@@ -172,7 +172,7 @@ h6 {
 
 .dark .glass-card {
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: none;
+  box-shadow: 0 8px 32px 0 rgba(34, 197, 94, 0.04);
 }
 
 /* Fix for dnd-kit drag handles */

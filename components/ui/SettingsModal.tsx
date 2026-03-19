@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Save, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, Palette, Clock, Eye, EyeOff, Sparkles, Loader2, CheckCircle, XCircle, Save, Zap, ChevronUp } from 'lucide-react';
 import { useSettingsStore, themes, getThemeById } from '@/lib/settings-store';
 import { useDeckStore } from '@/lib/store';
 import { useArticlesStore } from '@/lib/articles-store';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     aiSettings,
     setAiSettings,
   } = useSettingsStore();
+
+  const { t } = useTranslation();
 
   const [ollamaStatus, setOllamaStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const [availableModels, setAvailableModels] = useState<string[]>([]);
@@ -95,7 +98,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       const data = await res.json();
       if (res.ok && data.summary) {
         setAiTestStatus('success');
-        setAiTestMessage('Connection successful!');
+        setAiTestMessage(t('settings.connectionSuccessful'));
         setTimeout(() => setAiTestStatus('idle'), 4000);
       } else {
         setAiTestStatus('error');
@@ -104,7 +107,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     } catch (err: any) {
       if (err.name === 'AbortError') {
         setAiTestStatus('error');
-        setAiTestMessage('Request timed out (15s)');
+        setAiTestMessage(t('settings.requestTimedOut'));
       } else {
         setAiTestStatus('error');
         setAiTestMessage(err.message || 'Request failed');
@@ -136,7 +139,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         {/* Header & Tabs */}
         <div className="flex flex-col border-b border-border">
           <div className="flex items-center justify-between px-4 py-3">
-            <h2 className="text-lg font-semibold">Settings</h2>
+            <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
             <button
               onClick={onClose}
               className="p-1 hover:bg-background-tertiary rounded transition-colors text-foreground-secondary hover:text-foreground"
@@ -152,7 +155,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 activeTab === 'general' ? "text-foreground font-medium" : "text-foreground-secondary hover:text-foreground"
               )}
             >
-              General
+              {t('settings.general')}
               {activeTab === 'general' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-t-full" />}
             </button>
             <button
@@ -162,7 +165,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 activeTab === 'ai' ? "text-foreground font-medium" : "text-foreground-secondary hover:text-foreground"
               )}
             >
-              AI Assistant
+              {t('settings.aiAssistant')}
               {activeTab === 'ai' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-t-full" />}
             </button>
           </div>
@@ -176,7 +179,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Palette className="w-4 h-4" />
-                  <span>Color Theme</span>
+                  <span>{t('settings.colorTheme')}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {themes.map((theme) => (
@@ -210,7 +213,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Clock className="w-4 h-4" />
-                  <span>Auto Refresh Interval</span>
+                  <span>{t('settings.autoRefresh')}</span>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {[5, 10, 15, 30, 60].map((mins) => (
@@ -224,7 +227,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           : 'border-border hover:border-foreground-secondary'
                       )}
                     >
-                      {mins} min
+                      {mins} {t('settings.min')}
                     </button>
                   ))}
                 </div>
@@ -234,7 +237,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Eye className="w-4 h-4" />
-                  <span>Default View Mode</span>
+                  <span>{t('settings.defaultViewMode')}</span>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -246,7 +249,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         : 'border-border hover:border-foreground-secondary'
                     )}
                   >
-                    Comfortable
+                    {t('settings.comfortable')}
                   </button>
                   <button
                     onClick={() => setDefaultViewMode('compact')}
@@ -257,7 +260,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         : 'border-border hover:border-foreground-secondary'
                     )}
                   >
-                    Compact
+                    {t('settings.compact')}
                   </button>
                 </div>
               </div>
@@ -271,7 +274,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-accent" />
-                    AI Assistant
+                    {t('settings.aiAssistant')}
                   </h3>
                   <button
                     onClick={() => setAiSettings({ enabled: !aiSettings.enabled })}
@@ -294,7 +297,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     {/* AI Provider */}
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-foreground-secondary">
-                        AI Provider
+                        {t('settings.aiProvider')}
                       </label>
                       <select
                         value={aiSettings.provider}
@@ -309,12 +312,12 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         })}
                         className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none"
                       >
-                        <option value="ollama">Ollama (Local)</option>
-                        <option value="openai">OpenAI (API)</option>
-                        <option value="anthropic">Anthropic (API)</option>
-                        <option value="gemini">Google Gemini (API)</option>
-                        <option value="minimax">Minimax (API)</option>
-                        <option value="kimi">Kimi / Moonshot (API)</option>
+                        <option value="ollama">{t('settings.ollamaLocal')}</option>
+                        <option value="openai">{t('settings.openaiApi')}</option>
+                        <option value="anthropic">{t('settings.anthropicApi')}</option>
+                        <option value="gemini">{t('settings.geminiApi')}</option>
+                        <option value="minimax">{t('settings.minimaxApi')}</option>
+                        <option value="kimi">{t('settings.kimiApi')}</option>
                       </select>
                     </div>
 
@@ -322,7 +325,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     {aiSettings.provider !== 'ollama' && (
                       <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                         <label className="text-xs font-medium text-foreground-secondary">
-                          API Key
+                          {t('settings.apiKey')}
                         </label>
                         <div className="relative">
                           <input
@@ -332,14 +335,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                               const newApiKeys = { ...(aiSettings.apiKeys || {}), [aiSettings.provider]: e.target.value };
                               setAiSettings({ apiKeys: newApiKeys });
                             }}
-                            placeholder={`Enter ${aiSettings.provider} API key`}
+                            placeholder={t('settings.enterApiKey', { provider: aiSettings.provider })}
                             className="w-full px-3 py-2 pr-9 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none transition-all"
                           />
                           <button
                             type="button"
                             onClick={() => setShowApiKey(!showApiKey)}
                             className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-secondary hover:text-foreground transition-colors"
-                            title={showApiKey ? 'Hide API key' : 'Show API key'}
+                            title={showApiKey ? t('settings.hideApiKey') : t('settings.showApiKey')}
                           >
                             {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
@@ -351,7 +354,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     {aiSettings.provider === 'ollama' && (
                       <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
                         <label className="text-xs font-medium text-foreground-secondary">
-                          Ollama URL
+                          {t('settings.ollamaUrl')}
                         </label>
                         <input
                           type="text"
@@ -365,19 +368,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           {ollamaStatus === 'checking' && (
                             <>
                               <Loader2 className="w-3 h-3 animate-spin text-foreground-secondary" />
-                              <span className="text-foreground-secondary">Checking connection...</span>
+                              <span className="text-foreground-secondary">{t('settings.checkingConnection')}</span>
                             </>
                           )}
                           {ollamaStatus === 'connected' && (
                             <>
                               <CheckCircle className="w-3 h-3 text-success" />
-                              <span className="text-success">Ollama connected</span>
+                              <span className="text-success">{t('settings.ollamaConnected')}</span>
                             </>
                           )}
                           {ollamaStatus === 'disconnected' && (
                             <>
                               <XCircle className="w-3 h-3 text-error" />
-                              <span className="text-error">Ollama not running</span>
+                              <span className="text-error">{t('settings.ollamaNotRunning')}</span>
                             </>
                           )}
                         </div>
@@ -387,7 +390,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     {/* Model Selection */}
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-foreground-secondary">
-                        Model
+                        {t('settings.model')}
                       </label>
                       {aiSettings.provider === 'ollama' && availableModels.length > 0 ? (
                         <select
@@ -417,39 +420,17 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       )}
                     </div>
 
-                    {/* Summary Language */}
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-foreground-secondary">
-                        Summary Language
-                      </label>
-                      <select
-                        value={aiSettings.language}
-                        onChange={(e) => setAiSettings({ language: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none"
-                      >
-                        <option value="Original Language">Original Language (Auto)</option>
-                        <option value="English">English</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Chinese">Chinese</option>
-                        <option value="Japanese">Japanese</option>
-                        <option value="Korean">Korean</option>
-                        <option value="Portuguese">Portuguese</option>
-                      </select>
-                    </div>
-
                     {/* Custom Summary Prompt */}
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-medium text-foreground-secondary">
-                          Custom Summary Prompt
+                          {t('settings.customPrompt')}
                         </label>
                       </div>
                       <textarea
                         value={aiSettings.customSummaryPrompt || ''}
                         onChange={(e) => setAiSettings({ customSummaryPrompt: e.target.value })}
-                        placeholder="e.g. You are an expert analyst. Summarize this article in 3 bullet points."
+                        placeholder={t('settings.customPromptPlaceholder')}
                         className="w-full h-24 px-3 py-2 rounded-lg border border-border bg-background text-sm focus:border-accent focus:outline-none resize-y"
                       />
                       <p className="text-[10px] text-foreground-secondary leading-tight">
@@ -467,9 +448,9 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           }`}
                       >
                         {aiSaved ? (
-                          <><CheckCircle className="w-3.5 h-3.5" /> Saved!</>
+                          <><CheckCircle className="w-3.5 h-3.5" /> {t('settings.saved')}</>
                         ) : (
-                          <><Save className="w-3.5 h-3.5" /> Save</>
+                          <><Save className="w-3.5 h-3.5" /> {t('settings.save')}</>
                         )}
                       </button>
                       <button
@@ -483,13 +464,13 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           } disabled:opacity-50`}
                       >
                         {isTestingAi ? (
-                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Testing...</>
+                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {t('settings.testing')}</>
                         ) : aiTestStatus === 'success' ? (
-                          <><CheckCircle className="w-3.5 h-3.5" /> Working!</>
+                          <><CheckCircle className="w-3.5 h-3.5" /> {t('settings.working')}</>
                         ) : aiTestStatus === 'error' ? (
-                          <><XCircle className="w-3.5 h-3.5" /> Failed</>
+                          <><XCircle className="w-3.5 h-3.5" /> {t('settings.failed')}</>
                         ) : (
-                          <><Zap className="w-3.5 h-3.5" /> Test AI</>
+                          <><Zap className="w-3.5 h-3.5" /> {t('settings.testAi')}</>
                         )}
                       </button>
                       {aiTestMessage && (
@@ -510,7 +491,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         {/* Footer */}
         <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-background-tertiary">
           <p className="text-xs text-foreground-secondary text-center">
-            Settings are saved automatically
+            {t('settings.settingsSavedAuto')}
           </p>
         </div>
       </div>

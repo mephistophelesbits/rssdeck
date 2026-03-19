@@ -7,6 +7,7 @@ import { ArticlePreviewPanel } from '@/components/ui/ArticlePreviewPanel';
 import { RelativeTime } from '@/components/ui/RelativeTime';
 import { Article } from '@/lib/types';
 import { decodeHtml } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 type SavedSearchRule = {
   id: string;
@@ -34,6 +35,7 @@ type SearchResult = {
 };
 
 export function SearchWorkspace() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [ruleName, setRuleName] = useState('');
   const [savedRules, setSavedRules] = useState<SavedSearchRule[]>([]);
@@ -68,7 +70,7 @@ export function SearchWorkspace() {
   async function handleRunSearch(nextQuery?: string) {
     const queryToRun = (nextQuery ?? query).trim();
     if (!queryToRun) {
-      setWorkspaceMessage('Enter one or more keywords separated by commas.');
+      setWorkspaceMessage(t('search.enterKeywords'));
       return;
     }
 
@@ -100,7 +102,7 @@ export function SearchWorkspace() {
   async function handleSaveRule() {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) {
-      setWorkspaceMessage('Run or enter a search before saving it.');
+      setWorkspaceMessage(t('search.runBeforeSaving'));
       return;
     }
 
@@ -128,7 +130,7 @@ export function SearchWorkspace() {
         setSelectedRuleId(match.id);
         setRuleName(match.name);
       }
-      setWorkspaceMessage('Search rule saved locally.');
+      setWorkspaceMessage(t('search.searchRuleSaved'));
     } catch (error) {
       setWorkspaceMessage(error instanceof Error ? error.message : 'Failed to save search');
     } finally {
@@ -180,8 +182,8 @@ export function SearchWorkspace() {
               <Search className="h-4 w-4" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold">Search</h1>
-              <p className="text-xs text-foreground-secondary">Saved article search rules</p>
+              <h1 className="text-lg font-semibold">{t('search.title')}</h1>
+              <p className="text-xs text-foreground-secondary">{t('search.subtitle')}</p>
             </div>
           </div>
 
@@ -190,7 +192,7 @@ export function SearchWorkspace() {
               type="text"
               value={ruleName}
               onChange={(event) => setRuleName(event.target.value)}
-              placeholder="Rule name (optional)"
+              placeholder={t('search.ruleNamePlaceholder')}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-accent focus:outline-none"
             />
             <button
@@ -200,19 +202,19 @@ export function SearchWorkspace() {
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Save className="h-4 w-4" />
-              {isSaving ? 'Saving…' : 'Save Search'}
+              {isSaving ? t('search.saving') : t('search.saveSearch')}
             </button>
           </div>
 
           <div className="mt-5 flex items-center justify-between">
-            <div className="text-xs font-medium uppercase tracking-[0.22em] text-foreground-secondary">Saved Rules</div>
+            <div className="text-xs font-medium uppercase tracking-[0.22em] text-foreground-secondary">{t('search.savedRules')}</div>
             <div className="text-xs text-foreground-secondary">{savedRules.length}</div>
           </div>
 
           <div className="mt-3 space-y-2 overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 260px)' }}>
             {savedRules.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border p-4 text-sm text-foreground-secondary">
-                Save a search to reuse your keyword rules later.
+                {t('search.savedRulesEmpty')}
               </div>
             ) : (
               savedRules.map((rule) => (
@@ -240,7 +242,7 @@ export function SearchWorkspace() {
                     </div>
                   </button>
                   <div className="mt-3 flex items-center justify-between text-[11px] text-foreground-secondary">
-                    <span>{rule.lastRunAt ? `Ran ${new Date(rule.lastRunAt).toLocaleDateString()}` : 'Not run yet'}</span>
+                    <span>{rule.lastRunAt ? t('search.ran', { date: new Date(rule.lastRunAt).toLocaleDateString() }) : t('search.notRunYet')}</span>
                     <button
                       type="button"
                       onClick={() => void handleDeleteRule(rule.id)}
@@ -261,14 +263,14 @@ export function SearchWorkspace() {
             <header className="border-b border-border bg-background-secondary px-5 py-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold">Article Search</h2>
+                  <h2 className="text-lg font-semibold">{t('search.articleSearch')}</h2>
                   <p className="mt-1 text-sm text-foreground-secondary">
-                    Search your stored corpus with comma-separated keywords. Example: <span className="text-foreground">china, semiconductors, export controls</span>
+                    {t('search.articleSearchDesc')} <span className="text-foreground">{t('search.articleSearchExample')}</span>
                   </p>
                 </div>
                 <div className="rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground-secondary">
                   <div className="font-medium text-foreground">{searchMeta.resultCount}</div>
-                  <div>results</div>
+                  <div>{t('search.results')}</div>
                 </div>
               </div>
 
@@ -284,7 +286,7 @@ export function SearchWorkspace() {
                         void handleRunSearch();
                       }
                     }}
-                    placeholder="Keywords separated by commas"
+                    placeholder={t('search.keywordsPlaceholder')}
                     className="w-full rounded-xl border border-border bg-background px-10 py-3 text-sm focus:border-accent focus:outline-none"
                   />
                 </div>
@@ -294,14 +296,14 @@ export function SearchWorkspace() {
                   disabled={isSearching}
                   className="rounded-xl bg-accent px-4 py-3 text-sm font-medium text-[color:var(--accent-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isSearching ? 'Searching…' : 'Search'}
+                  {isSearching ? t('search.searching') : t('search.searchButton')}
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleRunSearch()}
                   disabled={isSearching || !query.trim()}
                   className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground-secondary transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
-                  title="Refresh search results"
+                  title={t('search.refreshResults')}
                 >
                   <RefreshCw className={`h-4 w-4 ${isSearching ? 'animate-spin' : ''}`} />
                 </button>
@@ -315,7 +317,7 @@ export function SearchWorkspace() {
                 ))}
                 {keywords.length > 0 && (
                   <span className="text-xs text-foreground-secondary">
-                    {searchMeta.sourceCount} sources
+                    {searchMeta.sourceCount} {t('search.sourcesCount')}
                   </span>
                 )}
               </div>
@@ -328,9 +330,9 @@ export function SearchWorkspace() {
               {results.length === 0 ? (
                 <div className="flex h-full flex-col items-center justify-center px-6 text-center text-foreground-secondary">
                   <Database className="mb-4 h-10 w-10 opacity-40" />
-                  <p className="text-base font-medium text-foreground">Search your stored articles</p>
+                  <p className="text-base font-medium text-foreground">{t('search.emptyTitle')}</p>
                   <p className="mt-2 max-w-lg text-sm">
-                    Results include title, article snippet, source title, extracted themes, and entities from the local intelligence database.
+                    {t('search.emptyDesc')}
                   </p>
                 </div>
               ) : (
@@ -370,14 +372,14 @@ export function SearchWorkspace() {
                         </div>
                         <div className="shrink-0 text-right">
                           <div className="text-sm font-semibold">{result.relevance.toFixed(1)}</div>
-                          <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">score</div>
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('search.score')}</div>
                           <a
                             href={result.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={(event) => event.stopPropagation()}
                             className="mt-3 inline-flex rounded-lg border border-border p-2 text-foreground-secondary transition-colors hover:border-accent hover:text-accent"
-                            title="Open original"
+                            title={t('search.openOriginal')}
                           >
                             <ExternalLink className="h-4 w-4" />
                           </a>

@@ -6,6 +6,7 @@ import { useBookmarksStore } from '@/lib/bookmarks-store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { TimeAgo } from '@/components/ui/TimeAgo';
 import { cn, decodeHtml } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 
 interface ArticleCardProps {
@@ -18,6 +19,7 @@ interface ArticleCardProps {
 
 
 export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSelected = false }: ArticleCardProps) {
+  const { t } = useTranslation();
   const { isBookmarked, toggleBookmark } = useBookmarksStore();
   const bookmarked = isBookmarked(article.id);
   const { aiSettings } = useSettingsStore();
@@ -46,7 +48,7 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
     }
 
     if (!aiSettings.enabled) {
-      alert('AI Summary is disabled. Enable it in Settings.');
+      alert(t('article.aiSummaryDisabled'));
       return;
     }
 
@@ -127,12 +129,12 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
             >
               <div className="flex items-center gap-2 mb-2 text-accent font-medium text-xs uppercase tracking-wider">
                 <Sparkles className="w-3 h-3" />
-                AI Summary
+                {t('article.aiSummary')}
               </div>
               {isSummarizing ? (
                 <div className="flex items-center gap-2 text-foreground-secondary">
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  Generating summary...
+                  {t('article.generatingSummary')}
                 </div>
               ) : (
                 <div className="text-foreground-secondary">
@@ -183,7 +185,7 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
               ? 'text-warning bg-warning/10'
               : 'text-foreground-secondary opacity-0 group-hover:opacity-100 hover:text-warning hover:bg-warning/10'
           )}
-          title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+          title={bookmarked ? t('article.removeBookmark') : t('article.addBookmark')}
         >
           <Bookmark className={cn('w-4 h-4', bookmarked && 'fill-current')} />
         </div>
@@ -197,7 +199,7 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
               ? 'text-accent bg-accent/10 opacity-100'
               : 'text-foreground-secondary opacity-0 group-hover:opacity-100 hover:text-accent hover:bg-accent/10'
           )}
-          title="Generate AI Summary"
+          title={t('article.generateAiSummary')}
         >
           <Sparkles className={cn('w-4 h-4', showSummary && 'fill-current')} />
         </div>

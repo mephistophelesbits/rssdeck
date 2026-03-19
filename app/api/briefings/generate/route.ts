@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const aiSettings = body.aiSettings || {};
+    const locale = body.locale || 'en';
     const recentArticles = getRecentArticlesForBriefing(50, 2);
     const storylines = getStorylineClusters(7);
 
@@ -140,9 +141,13 @@ ${globalSignalsText}
 Storyline clusters:
 ${storylineText || 'none'}`;
 
+    const localizedPrompt = locale === 'zh-CN'
+      ? prompt + '\n\nIMPORTANT: Write the entire response in Simplified Chinese (简体中文), including all section headings. Use these exact headings: ## 执行摘要, ## 关键主题, ## 重要性分析'
+      : prompt;
+
     const result = await generateText(
       aiSettings.provider || 'ollama',
-      prompt,
+      localizedPrompt,
       {
         apiKey: aiSettings.apiKeys?.[aiSettings.provider] || aiSettings.apiKey,
         baseUrl: aiSettings.ollamaUrl,
@@ -152,7 +157,9 @@ ${storylineText || 'none'}`;
 
     const briefing = saveBriefing({
       briefingDate: new Date().toISOString(),
-      title: `Daily Briefing ${new Date().toLocaleDateString()}`,
+      title: locale === 'zh-CN'
+        ? `每日简报 ${new Date().toLocaleDateString()}`
+        : `Daily Briefing ${new Date().toLocaleDateString()}`,
       executiveSummary: result.text,
       keyThemes: extractThemes(topStories.map((story) => ({ primary_category: story.category }))),
       topStories,

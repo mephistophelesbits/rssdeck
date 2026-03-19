@@ -5,6 +5,7 @@ import { useBookmarksStore } from '@/lib/bookmarks-store';
 import { RelativeTime } from '@/components/ui/RelativeTime';
 import { Article } from '@/lib/types';
 import { decodeHtml } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface BookmarksModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface BookmarksModalProps {
 }
 
 export function BookmarksModal({ isOpen, onClose, onArticleClick }: BookmarksModalProps) {
+  const { t } = useTranslation();
   const { bookmarks, removeBookmark } = useBookmarksStore();
 
   if (!isOpen) return null;
@@ -36,9 +38,9 @@ export function BookmarksModal({ isOpen, onClose, onArticleClick }: BookmarksMod
         <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-2">
             <Bookmark className="w-5 h-5 text-warning" />
-            <h2 className="text-lg font-semibold">Bookmarks</h2>
+            <h2 className="text-lg font-semibold">{t('bookmarks.title')}</h2>
             <span className="text-sm text-foreground-secondary">
-              ({bookmarks.length} saved)
+              {t('bookmarks.savedCount', { count: bookmarks.length })}
             </span>
           </div>
           <button
@@ -54,9 +56,9 @@ export function BookmarksModal({ isOpen, onClose, onArticleClick }: BookmarksMod
           {bookmarks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-foreground-secondary">
               <Bookmark className="w-12 h-12 mb-3 opacity-30" />
-              <p className="text-base font-medium">No Bookmarks Yet</p>
+              <p className="text-base font-medium">{t('bookmarks.noBookmarks')}</p>
               <p className="text-sm mt-1 opacity-70">
-                Click the bookmark icon on any article to save it
+                {t('bookmarks.noBookmarksDesc')}
               </p>
             </div>
           ) : (
@@ -111,7 +113,7 @@ export function BookmarksModal({ isOpen, onClose, onArticleClick }: BookmarksMod
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-1.5 rounded hover:bg-background text-foreground-secondary hover:text-accent transition-colors"
-                            title="Open original"
+                            title={t('bookmarks.openOriginal')}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <ExternalLink className="w-4 h-4" />
@@ -122,7 +124,7 @@ export function BookmarksModal({ isOpen, onClose, onArticleClick }: BookmarksMod
                               removeBookmark(article.id);
                             }}
                             className="p-1.5 rounded hover:bg-background text-foreground-secondary hover:text-error transition-colors"
-                            title="Remove bookmark"
+                            title={t('bookmarks.removeBookmark')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

@@ -18,7 +18,7 @@ function formatBriefingMessage(briefing: {
   executiveSummary: string;
   keyThemes?: string[];
   topStories?: Array<{ title: string; sourceTitle: string | null; url: string }>;
-}) {
+}, locale: string = 'en') {
   const safeSummary = escapeHtml(briefing.executiveSummary)
     .replace(/^##\s+(.*)$/gm, '<b>$1</b>')
     .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
@@ -33,8 +33,8 @@ function formatBriefingMessage(briefing: {
     `🗞️ <b>${escapeHtml(briefing.title)}</b>`,
     '',
     safeSummary,
-    themes ? `\n<b>Key Themes</b>\n${themes}` : '',
-    topStories ? `\n<b>Top Stories</b>\n${topStories}` : '',
+    themes ? `\n<b>${locale === 'zh-CN' ? '关键主题' : 'Key Themes'}</b>\n${themes}` : '',
+    topStories ? `\n<b>${locale === 'zh-CN' ? '热门报道' : 'Top Stories'}</b>\n${topStories}` : '',
   ].filter(Boolean).join('\n');
 }
 
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const briefing = body.briefing;
     const telegramToken = body.telegramToken;
     const telegramChatId = body.telegramChatId;
+    const locale = body.locale || 'en';
 
     if (!briefing?.title || !briefing?.executiveSummary || !telegramToken || !telegramChatId) {
       return NextResponse.json({ error: 'Missing push payload' }, { status: 400 });
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: telegramChatId,
-        text: formatBriefingMessage(briefing),
+        text: formatBriefingMessage(briefing, locale),
         parse_mode: 'HTML',
         disable_web_page_preview: true,
       }),

@@ -7,6 +7,7 @@ import { useSettingsStore } from '@/lib/settings-store';
 import { categories, Category } from '@/lib/categories';
 import { parseOPML, isValidOPML, OPMLFeed } from '@/lib/opml';
 import { cn, generateId } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface AddColumnModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ async function getApiError(response: Response, fallback: string) {
 }
 
 export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>('categories');
   const [url, setUrl] = useState('');
   const [isValidating, setIsValidating] = useState(false);
@@ -47,7 +49,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
 
   const handleAddCustomFeed = async () => {
     if (!url.trim()) {
-      setError('Please enter a URL');
+      setError(t('addColumn.pleaseEnterUrl'));
       return;
     }
 
@@ -121,20 +123,20 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
       const text = await file.text();
 
       if (!isValidOPML(text)) {
-        setOpmlError('Invalid OPML file. Please check the format.');
+        setOpmlError(t('addColumn.invalidOpml'));
         return;
       }
 
       const result = parseOPML(text);
 
       if (result.feeds.length === 0) {
-        setOpmlError('No RSS feeds found in this OPML file.');
+        setOpmlError(t('addColumn.noFeedsInOpml'));
         return;
       }
 
       setOpmlFeeds(result.feeds);
     } catch (err) {
-      setOpmlError('Failed to parse OPML file.');
+      setOpmlError(t('addColumn.failedParseOpml'));
       console.error(err);
     }
   };
@@ -215,7 +217,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
       <div className="relative bg-background-secondary border border-border rounded-xl w-full max-w-lg mx-4 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h2 className="text-lg font-semibold">Add Column</h2>
+          <h2 className="text-lg font-semibold">{t('addColumn.title')}</h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-background-tertiary rounded transition-colors text-foreground-secondary hover:text-foreground"
@@ -236,7 +238,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
             )}
           >
             <Folder className="w-4 h-4" />
-            Categories
+            {t('addColumn.categories')}
           </button>
           <button
             onClick={() => setActiveTab('url')}
@@ -248,7 +250,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
             )}
           >
             <Link2 className="w-4 h-4" />
-            Custom URL
+            {t('addColumn.customUrl')}
           </button>
           <button
             onClick={() => setActiveTab('opml')}
@@ -260,7 +262,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
             )}
           >
             <Upload className="w-4 h-4" />
-            OPML Import
+            {t('addColumn.opmlImport')}
           </button>
         </div>
 
@@ -279,7 +281,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                     {category.name}
                   </span>
                   <span className="text-xs text-foreground-secondary mt-0.5">
-                    {category.feeds.length} feeds
+                    {category.feeds.length} {t('addColumn.feedsCount')}
                   </span>
                 </button>
               ))}
@@ -290,7 +292,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  RSS Feed URL
+                  {t('addColumn.rssFeedUrl')}
                 </label>
                 <input
                   type="url"
@@ -318,18 +320,18 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                 {isValidating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Validating...
+                    {t('addColumn.validating')}
                   </>
                 ) : (
                   <>
                     <Check className="w-4 h-4" />
-                    Add Feed
+                    {t('addColumn.addFeed')}
                   </>
                 )}
               </button>
 
               <p className="text-xs text-foreground-secondary text-center">
-                Enter the URL of any RSS or Atom feed
+                {t('addColumn.enterUrl')}
               </p>
             </div>
           )}
@@ -347,16 +349,16 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                 />
                 <FileText className="w-10 h-10 mx-auto mb-3 text-foreground-secondary" />
                 <p className="text-sm font-medium mb-1">
-                  Drop your OPML file here
+                  {t('addColumn.dropOpml')}
                 </p>
                 <p className="text-xs text-foreground-secondary mb-3">
-                  or click to browse
+                  {t('addColumn.orClickBrowse')}
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="px-4 py-2 bg-background-tertiary hover:bg-border text-sm font-medium rounded-lg transition-colors"
                 >
-                  Select File
+                  {t('addColumn.selectFile')}
                 </button>
               </div>
 
@@ -368,7 +370,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      Found {opmlFeeds.length} feeds
+                      {t('addColumn.foundFeeds').replace('{count}', String(opmlFeeds.length))}
                     </span>
                     <button
                       onClick={() => {
@@ -377,7 +379,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                       }}
                       className="text-xs text-foreground-secondary hover:text-foreground"
                     >
-                      Clear
+                      {t('addColumn.clear')}
                     </button>
                   </div>
 
@@ -392,7 +394,7 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                     ))}
                     {opmlFeeds.length > 10 && (
                       <p className="text-xs text-foreground-secondary text-center py-2">
-                        ...and {opmlFeeds.length - 10} more
+                        {t('addColumn.andMore').replace('{count}', String(opmlFeeds.length - 10))}
                       </p>
                     )}
                   </div>
@@ -408,21 +410,21 @@ export function AddColumnModal({ isOpen, onClose }: AddColumnModalProps) {
                       ) : (
                         <Check className="w-4 h-4" />
                       )}
-                      Add as One Column
+                      {t('addColumn.addAsOneColumn')}
                     </button>
                     <button
                       onClick={handleImportAllAsColumns}
                       disabled={isImporting}
                       className="flex-1 py-2.5 bg-background-tertiary hover:bg-border disabled:opacity-50 font-medium rounded-lg transition-colors"
                     >
-                      Split by Category
+                      {t('addColumn.splitByCategory')}
                     </button>
                   </div>
                 </div>
               )}
 
               <p className="text-xs text-foreground-secondary text-center">
-                Import feeds from Feedly, Inoreader, Google Reader, etc.
+                {t('addColumn.importHelp')}
               </p>
             </div>
           )}

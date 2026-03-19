@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LandingPage() {
+  const { t } = useTranslation();
   useEffect(() => {
     // Scroll animations
     const observer = new IntersectionObserver((entries) => {
@@ -455,18 +457,18 @@ export default function LandingPage() {
           <a className="logo" href="#">
             <span className="material-symbols-outlined logo-icon">rss_feed</span>
             <span className="logo-text">RSS<span>DECK</span></span>
-            <span className="logo-badge">SELF-HOSTED</span>
+            <span className="logo-badge">{t('landing.selfHosted')}</span>
           </a>
           <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#privacy">Privacy</a>
-            <a href="#themes">Themes</a>
-            <a href="#deploy">Self-Host</a>
+            <a href="#features">{t('landing.features')}</a>
+            <a href="#privacy">{t('landing.privacy')}</a>
+            <a href="#themes">{t('landing.themesNav')}</a>
+            <a href="#deploy">{t('landing.selfHost')}</a>
             <button className="theme-toggle" onClick={() => document.documentElement.classList.toggle('dark')}>
               <span className="material-symbols-outlined dark-icon">dark_mode</span>
               <span className="material-symbols-outlined light-icon">light_mode</span>
             </button>
-            <a className="nav-cta" href="#deploy">Get Started</a>
+            <a className="nav-cta" href="#deploy">{t('landing.getStarted')}</a>
           </div>
         </div>
       </nav>
@@ -477,26 +479,22 @@ export default function LandingPage() {
           <div className="flex flex-col items-center">
             <div className="hero-badge inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green/10 border border-green/30 text-green text-sm font-semibold mb-6">
               <span className="material-symbols-outlined text-base">shield_lock</span>
-              100% Private & Self-Hosted
+              {t('landing.heroPrivateBadge')}
             </div>
             <h1>
-              Own Your Data.<br />
-              <span className="gradient">Command Your News.</span>
+              {t('landing.heroTitle1')}<br />
+              <span className="gradient">{t('landing.heroTitle2')}</span>
             </h1>
-            <p className="hero-subtitle">
-              A privacy-first RSS reader designed for power users. Run it on your
-              <strong> NAS</strong>, <strong>Home Server</strong>, or <strong>Local PC</strong>
-              with zero-cloud AI summarization powered by Ollama.
-            </p>
+            <p className="hero-subtitle" dangerouslySetInnerHTML={{ __html: t('landing.heroSubtitle') }} />
             <div className="hero-buttons">
               <a className="btn-primary" href="/dashboard" target="_blank" rel="noopener noreferrer">
-                Live Preview
+                {t('landing.livePreview')}
               </a>
               <a className="btn-secondary" href="#deploy">
-                Deploy Locally
+                {t('landing.deployLocally')}
               </a>
               <a className="btn-secondary" href="https://github.com/mephistophelesbits/rssdeck" target="_blank">
-                View Source
+                {t('landing.viewSource')}
               </a>
             </div>
 
@@ -532,21 +530,21 @@ export default function LandingPage() {
       {/* Simple sections for brevity in this component - real version would have full content */}
       <section className="features-section" id="features">
         <div className="container">
-          <h2 className="text-3xl font-extrabold text-center mb-12">Built for Power Users</h2>
+          <h2 className="text-3xl font-extrabold text-center mb-12">{t('landing.builtForPowerUsers')}</h2>
           <div className="features-grid">
             <div className="feature-card animate-on-scroll">
               <div className="w-11 h-11 bg-blue-500/10 text-blue-500 rounded-xl flex items-center justify-center mb-5">
                 <span className="material-symbols-outlined">lan</span>
               </div>
-              <h3 className="font-bold mb-2">Network Sovereignty</h3>
-              <p className="text-sm opacity-80">Runs entirely on your LAN. Access via VPN or local IP. You own the hardware.</p>
+              <h3 className="font-bold mb-2">{t('landing.networkSovereignty')}</h3>
+              <p className="text-sm opacity-80">{t('landing.networkSovereigntyDesc')}</p>
             </div>
             <div className="feature-card animate-on-scroll border-b-2 border-green">
               <div className="w-11 h-11 bg-green-500/10 text-green-500 rounded-xl flex items-center justify-center mb-5">
                 <span className="material-symbols-outlined">neurology</span>
               </div>
-              <h3 className="font-bold mb-2">Local-First AI</h3>
-              <p className="text-sm opacity-80">Leverages Ollama to run LLMs on your machine. Instant offline AI summaries.</p>
+              <h3 className="font-bold mb-2">{t('landing.localFirstAi')}</h3>
+              <p className="text-sm opacity-80">{t('landing.localFirstAiDesc')}</p>
             </div>
           </div>
         </div>
@@ -555,17 +553,17 @@ export default function LandingPage() {
       <section className="deploy-section" id="deploy">
         <div className="container">
           <div className="deploy-card">
-            <h2 className="text-4xl font-black mb-6">Host It Anywhere</h2>
+            <h2 className="text-4xl font-black mb-6">{t('landing.hostItAnywhere')}</h2>
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="flex flex-col gap-6">
                 <div className="flex gap-4">
                   <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/20"><span className="material-symbols-outlined">dns</span></div>
-                  <div><h4 className="font-bold">Home Server</h4><p className="text-sm opacity-60">Docker ready for ARM and x86.</p></div>
+                  <div><h4 className="font-bold">{t('landing.homeServer')}</h4><p className="text-sm opacity-60">{t('landing.homeServerDesc')}</p></div>
                 </div>
-                <a href="https://hub.docker.com/r/kianfong/rssdeck" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold inline-block text-center mt-4">Docker Hub</a>
+                <a href="https://hub.docker.com/r/kianfong/rssdeck" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold inline-block text-center mt-4">{t('landing.dockerHub')}</a>
               </div>
               <div className="bg-black/40 border border-white/10 rounded-2xl p-6 font-mono text-sm">
-                <div className="text-green text-xs font-bold mb-4 uppercase tracking-widest">Self-Host Command</div>
+                <div className="text-green text-xs font-bold mb-4 uppercase tracking-widest">{t('landing.selfHostCommand')}</div>
                 <div className="text-blue-400">docker pull kianfong/rssdeck:latest</div>
                 <div className="text-teal-400 mt-2">docker run -d -p 3000:3000 \</div>
                 <div className="text-teal-400">  -v rss-data:/app/data \</div>
@@ -580,10 +578,10 @@ export default function LandingPage() {
         <div className="container py-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2 font-black uppercase"><span className="material-symbols-outlined text-green">shield_person</span> RSS DECK</div>
           <div className="flex gap-8 text-xs font-medium opacity-50">
-            <a href="https://github.com/mephistophelesbits/rssdeck">GitHub</a>
-            <a href="https://hub.docker.com/r/kianfong/rssdeck">Docker</a>
+            <a href="https://github.com/mephistophelesbits/rssdeck">{t('landing.github')}</a>
+            <a href="https://hub.docker.com/r/kianfong/rssdeck">{t('landing.docker')}</a>
           </div>
-          <div className="text-xs opacity-50">© 2026 RSS Deck. Open Source.</div>
+          <div className="text-xs opacity-50">{t('landing.copyright')}</div>
         </div>
       </footer>
     </div>

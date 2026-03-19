@@ -16,6 +16,7 @@ import {
 } from '@/lib/deck-client';
 import { DeckStateSnapshot, FeedSource } from '@/lib/types';
 import { cn, generateId } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n';
 
 interface AddFeedModalProps {
   isOpen: boolean;
@@ -39,6 +40,7 @@ async function getApiError(response: Response, fallback: string) {
 }
 
 export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<Tab>('categories');
   const [url, setUrl] = useState('');
   const [isValidating, setIsValidating] = useState(false);
@@ -95,7 +97,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
 
   const handleAddCustomFeed = async () => {
     if (!url.trim()) {
-      setError('Please enter a URL');
+      setError(t('addFeed.pleaseEnterUrl'));
       return;
     }
 
@@ -166,20 +168,20 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
       const text = await file.text();
 
       if (!isValidOPML(text)) {
-        setOpmlError('Invalid OPML file. Please check the format.');
+        setOpmlError(t('addFeed.invalidOpml'));
         return;
       }
 
       const result = parseOPML(text);
 
       if (result.feeds.length === 0) {
-        setOpmlError('No RSS feeds found in this OPML file.');
+        setOpmlError(t('addFeed.noFeedsInOpml'));
         return;
       }
 
       setOpmlFeeds(result.feeds);
     } catch (err) {
-      setOpmlError('Failed to parse OPML file.');
+      setOpmlError(t('addFeed.failedParseOpml'));
       console.error(err);
     }
   };
@@ -258,7 +260,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
 
       <div className="relative bg-background-secondary border border-border rounded-xl w-full max-w-lg mx-4 shadow-2xl max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
-          <h2 className="text-lg font-semibold">Add Feed</h2>
+          <h2 className="text-lg font-semibold">{t('addFeed.title')}</h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-background-tertiary rounded transition-colors text-foreground-secondary hover:text-foreground"
@@ -270,7 +272,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
         <div className="px-4 py-3 border-b border-border bg-background-tertiary/50 flex-shrink-0">
           <label className="flex items-center gap-2 text-sm font-medium mb-2">
             <Columns className="w-4 h-4" />
-            Add to
+            {t('addFeed.addTo')}
           </label>
           <div className="flex flex-wrap gap-2">
             <button
@@ -283,7 +285,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
               )}
             >
               <Plus className="w-3.5 h-3.5" />
-              New Column
+              {t('addFeed.newColumn')}
             </button>
             {columns.map((col) => (
               <button
@@ -313,7 +315,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
             )}
           >
             <Folder className="w-4 h-4" />
-            Categories
+            {t('addFeed.categories')}
           </button>
           <button
             onClick={() => setActiveTab('url')}
@@ -325,7 +327,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
             )}
           >
             <Link2 className="w-4 h-4" />
-            Custom URL
+            {t('addFeed.customUrl')}
           </button>
           <button
             onClick={() => setActiveTab('opml')}
@@ -337,7 +339,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
             )}
           >
             <Upload className="w-4 h-4" />
-            OPML
+            {t('addFeed.opml')}
           </button>
         </div>
 
@@ -355,7 +357,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                     {category.name}
                   </span>
                   <span className="text-xs text-foreground-secondary mt-0.5">
-                    {category.feeds.length} feeds
+                    {category.feeds.length} {t('addFeed.feedsCount')}
                   </span>
                 </button>
               ))}
@@ -366,7 +368,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  RSS Feed URL
+                  {t('addFeed.rssFeedUrl')}
                 </label>
                 <input
                   type="url"
@@ -394,12 +396,12 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                 {isValidating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Validating...
+                    {t('addFeed.validating')}
                   </>
                 ) : (
                   <>
                     <Check className="w-4 h-4" />
-                    {targetColumn === 'new' ? 'Add as New Column' : 'Add to Column'}
+                    {targetColumn === 'new' ? t('addFeed.addAsNewColumn') : t('addFeed.addToColumn')}
                   </>
                 )}
               </button>
@@ -407,9 +409,9 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
               {savedFeeds.length > 0 && (
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="flex items-center justify-between gap-3 mb-3">
-                    <h3 className="text-sm font-medium">Saved Feeds</h3>
+                    <h3 className="text-sm font-medium">{t('addFeed.savedFeeds')}</h3>
                     <a href={getOpmlExportUrl()} className="text-xs text-accent hover:underline">
-                      Export OPML
+                      {t('addFeed.exportOpml')}
                     </a>
                   </div>
                   <div className="space-y-2 max-h-[200px] overflow-y-auto">
@@ -434,7 +436,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                             }
                           }}
                           className="p-1.5 text-foreground-secondary hover:text-error hover:bg-background-secondary rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Delete saved feed"
+                          title={t('addFeed.deleteSavedFeed')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -445,7 +447,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
               )}
 
               <p className="text-xs text-foreground-secondary text-center mt-2">
-                Enter the URL of any RSS or Atom feed
+                {t('addFeed.enterUrl')}
               </p>
             </div>
           )}
@@ -465,10 +467,10 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                 />
                 <FileText className="w-10 h-10 mx-auto mb-3 text-foreground-secondary" />
                 <p className="text-sm font-medium mb-1">
-                  Drop your OPML file here
+                  {t('addFeed.dropOpml')}
                 </p>
                 <p className="text-xs text-foreground-secondary mb-3">
-                  or click to browse
+                  {t('addFeed.orClickBrowse')}
                 </p>
                 <button
                   onClick={(e) => {
@@ -477,7 +479,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                   }}
                   className="px-4 py-2 bg-accent hover:bg-accent-hover text-white rounded-lg text-sm transition-colors"
                 >
-                  Select File
+                  {t('addFeed.selectFile')}
                 </button>
               </div>
 
@@ -489,7 +491,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      Found {opmlFeeds.length} feeds
+                      {t('addFeed.foundFeeds', { count: opmlFeeds.length })}
                     </span>
                     <button
                       onClick={() => {
@@ -498,7 +500,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                       }}
                       className="text-xs text-foreground-secondary hover:text-foreground"
                     >
-                      Clear
+                      {t('addFeed.clear')}
                     </button>
                   </div>
 
@@ -516,7 +518,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                     ))}
                     {opmlFeeds.length > 10 && (
                       <p className="text-xs text-foreground-secondary text-center py-2">
-                        ...and {opmlFeeds.length - 10} more
+                        {t('addFeed.andMore', { count: opmlFeeds.length - 10 })}
                       </p>
                     )}
                   </div>
@@ -532,7 +534,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                       ) : (
                         <Check className="w-4 h-4" />
                       )}
-                      {targetColumn === 'new' ? 'Import as Column' : 'Add to Column'}
+                      {targetColumn === 'new' ? t('addFeed.importAsColumn') : t('addFeed.addToColumn')}
                     </button>
                     {targetColumn === 'new' && (
                       <button
@@ -545,13 +547,13 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                         ) : (
                           <Columns className="w-4 h-4" />
                         )}
-                        Import as Multiple Columns
+                        {t('addFeed.importAsMultipleColumns')}
                       </button>
                     )}
                   </div>
 
                   <p className="text-xs text-foreground-secondary text-center">
-                    Choose to import all feeds into one column or create separate columns by category
+                    {t('addFeed.importHelp')}
                   </p>
                 </div>
               )}

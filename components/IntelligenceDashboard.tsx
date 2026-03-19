@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Globe2, BrainCircuit, RadioTower, Clock3, MapPinned, Shapes } from 'lucide-react';
 import { AppChrome } from '@/components/AppChrome';
 import { WorldMapPanel } from '@/components/WorldMapPanel';
+import { useTranslation } from '@/lib/i18n';
 
 type OverviewData = {
   totals: {
@@ -239,6 +240,7 @@ function getCountryFlag(countryCode: string | null | undefined) {
 }
 
 export function IntelligenceDashboard() {
+  const { t } = useTranslation();
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [days, setDays] = useState(7);
   const [isLoading, setIsLoading] = useState(true);
@@ -629,9 +631,9 @@ export function IntelligenceDashboard() {
         <div className="w-full px-4 py-4 md:px-5 md:py-5">
           <header className="mb-4 flex items-start justify-between gap-3 flex-wrap">
             <div className="min-w-0">
-              <h1 className="text-2xl font-semibold">Intelligence</h1>
+              <h1 className="text-2xl font-semibold">{t('intelligence.title')}</h1>
               <p className="mt-1 text-xs md:text-sm text-foreground-secondary">
-                Server-backed overview of stored articles, categories, locations, and ingest health.
+                {t('intelligence.subtitle')}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -647,9 +649,9 @@ export function IntelligenceDashboard() {
         )}
 
         <div className="grid gap-2 md:grid-cols-4">
-          <MetricCard icon={<BrainCircuit className="w-4 h-4" />} label="Articles" value={overview?.totals.articleCount ?? 0} delta={overview?.comparisons.articleDelta} />
-          <MetricCard icon={<RadioTower className="w-4 h-4" />} label="Sources" value={overview?.totals.sourceCount ?? 0} delta={overview?.comparisons.sourceDelta} />
-          <MetricCard icon={<Globe2 className="w-4 h-4" />} label="Map Points" value={overview?.mapPoints.length ?? 0} />
+          <MetricCard icon={<BrainCircuit className="w-4 h-4" />} label={t('intelligence.articles')} value={overview?.totals.articleCount ?? 0} delta={overview?.comparisons.articleDelta} />
+          <MetricCard icon={<RadioTower className="w-4 h-4" />} label={t('intelligence.sources')} value={overview?.totals.sourceCount ?? 0} delta={overview?.comparisons.sourceDelta} />
+          <MetricCard icon={<Globe2 className="w-4 h-4" />} label={t('intelligence.mapPoints')} value={overview?.mapPoints.length ?? 0} />
           <MetricCard
             icon={<Clock3 className="w-4 h-4" />}
             label="Last Ingested"
@@ -662,13 +664,13 @@ export function IntelligenceDashboard() {
           <section className="rounded-2xl border border-border bg-background-secondary p-4">
             <div className="flex items-center gap-2 mb-2">
               <Shapes className="w-4 h-4 text-accent" />
-              <h2 className="text-lg font-medium">Keyword Cloud</h2>
+              <h2 className="text-lg font-medium">{t('intelligence.keywordCloud')}</h2>
             </div>
             <p className="text-xs md:text-sm text-foreground-secondary mb-4">
               Bubble size reflects keyword prevalence in the selected window. Keywords are color-coded by dominant category.
             </p>
             {isLoading ? (
-              <p className="text-sm text-foreground-secondary">Loading overview…</p>
+              <p className="text-sm text-foreground-secondary">{t('intelligence.loadingOverview')}</p>
             ) : (
               <div
                 className="rounded-2xl border border-border bg-background h-[420px] md:h-[500px] overflow-hidden"
@@ -773,7 +775,7 @@ export function IntelligenceDashboard() {
           <section className="rounded-2xl border border-border bg-background-secondary p-4">
             <div className="flex items-center gap-2 mb-2">
               <MapPinned className="w-4 h-4 text-accent" />
-              <h2 className="text-lg font-medium">World Map</h2>
+              <h2 className="text-lg font-medium">{t('intelligence.worldMap')}</h2>
             </div>
             <p className="text-xs md:text-sm text-foreground-secondary mb-4">
               Geographic distribution of article coverage. Click a country or city to inspect location details.
@@ -795,7 +797,7 @@ export function IntelligenceDashboard() {
           <section className="rounded-2xl border border-border bg-background-secondary p-4">
             <div className="flex items-center gap-2 mb-2">
               <Shapes className="w-4 h-4 text-accent" />
-              <h2 className="text-lg font-medium">Keyword Category</h2>
+              <h2 className="text-lg font-medium">{t('intelligence.keywordCategory')}</h2>
             </div>
             <p className="text-xs md:text-sm text-foreground-secondary mb-4">
               Importance-ranked feed coverage for the selected keyword.
@@ -817,15 +819,15 @@ export function IntelligenceDashboard() {
                   </div>
                   <div className="grid gap-2 sm:grid-cols-3">
                     <div className="rounded-xl border border-border bg-background-secondary px-3 py-2">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Category</div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.category')}</div>
                       <div className="mt-1 font-medium">{themeDetail.category}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-background-secondary px-3 py-2">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Stories</div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.storiesLabel')}</div>
                       <div className="mt-1 font-medium">{themeDetail.storyCount}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-background-secondary px-3 py-2">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Keyword Score</div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.keywordScore')}</div>
                       <div className="mt-1 font-medium">{themeDetail.totalScore.toFixed(1)}</div>
                     </div>
                   </div>
@@ -875,36 +877,36 @@ export function IntelligenceDashboard() {
               {selectedMapSelection?.kind === 'country' && countryDetail ? (
                 <div className="flex gap-3">
                   <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-center">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Articles</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.articlesLabel')}</div>
                     <div className="mt-1 text-xl font-semibold">{countryDetail.articleCount}</div>
                   </div>
                   <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-center">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Mentions</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.mentions')}</div>
                     <div className="mt-1 text-xl font-semibold">{countryDetail.mentions}</div>
                   </div>
                   <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-center">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Sources</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.sourcesLabel')}</div>
                     <div className="mt-1 text-xl font-semibold">{countryDetail.sourceCount}</div>
                   </div>
                 </div>
               ) : locationDetail && selectedPoint ? (
                 <div className="flex gap-3">
                   <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-center">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Articles</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.articlesLabel')}</div>
                     <div className="mt-1 text-xl font-semibold">{selectedPoint.articleCount}</div>
                   </div>
                   <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-center">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Mentions</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.mentions')}</div>
                     <div className="mt-1 text-xl font-semibold">{selectedPoint.mentions}</div>
                   </div>
                   <div className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-center">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Country</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.country')}</div>
                     <div className="mt-1 text-xl font-semibold">{selectedPoint.countryCode}</div>
                   </div>
                 </div>
               ) : (
                 <div className="rounded-xl border border-dashed border-border bg-background px-4 py-6 text-sm text-foreground-secondary">
-                  Select a country or city on the map to inspect the location summary.
+                  {t('intelligence.selectCountry')}
                 </div>
               )}
             </section>
@@ -933,7 +935,7 @@ export function IntelligenceDashboard() {
                   </a>
                 ))}
                 {!countryDetail && !locationDetail && (
-                  <p className="text-sm text-foreground-secondary">Select a country or city on the map to inspect coverage.</p>
+                  <p className="text-sm text-foreground-secondary">{t('intelligence.selectCountry')}</p>
                 )}
               </div>
             </section>
@@ -943,7 +945,7 @@ export function IntelligenceDashboard() {
         <section className="rounded-2xl border border-border bg-background-secondary p-4">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
             <div>
-              <h2 className="text-lg font-medium">Trend Monitor</h2>
+              <h2 className="text-lg font-medium">{t('intelligence.trendMonitor')}</h2>
               <p className="text-sm text-foreground-secondary mt-1">
                 Compare the current window against the previous {days}-day window and inspect the latest persisted snapshot.
               </p>
@@ -951,7 +953,7 @@ export function IntelligenceDashboard() {
           </div>
           <div className="grid items-start gap-3 2xl:grid-cols-2">
             <div className="rounded-2xl border border-border bg-background p-3 2xl:h-[440px]">
-              <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-3">Latest Snapshot</div>
+              <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-3">{t('intelligence.latestSnapshot')}</div>
               <div className="space-y-1.5 2xl:max-h-[388px] 2xl:overflow-y-auto pr-1">
                 {(() => {
                   const snapshots = overview?.trendSnapshots ?? [];
@@ -1003,7 +1005,7 @@ export function IntelligenceDashboard() {
         <section className="rounded-2xl border border-border bg-background-secondary p-4">
           <div className="flex items-center gap-2 mb-2">
             <Shapes className="w-4 h-4 text-accent" />
-            <h2 className="text-lg font-medium">Storylines</h2>
+            <h2 className="text-lg font-medium">{t('intelligence.storylines')}</h2>
           </div>
           <p className="text-xs md:text-sm text-foreground-secondary mb-4">
             Cross-source clusters built from category plus shared entity anchors, to surface developing stories instead of isolated articles.
@@ -1019,7 +1021,7 @@ export function IntelligenceDashboard() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-border bg-background-secondary px-3 py-2 text-right">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Weight</div>
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('intelligence.weight')}</div>
                     <div className="text-sm font-medium">{Math.round(storyline.totalImportance)}</div>
                   </div>
                 </div>
@@ -1059,13 +1061,13 @@ export function IntelligenceDashboard() {
               </div>
             ))}
             {(overview?.storylines?.length ?? 0) === 0 && (
-              <p className="text-sm text-foreground-secondary">Not enough related coverage yet to form storylines.</p>
+              <p className="text-sm text-foreground-secondary">{t('intelligence.noStorylines')}</p>
             )}
           </div>
         </section>
 
         <section className="rounded-2xl border border-border bg-background-secondary p-4">
-          <h2 className="text-lg font-medium mb-4">Recent Stored Articles</h2>
+          <h2 className="text-lg font-medium mb-4">{t('intelligence.recentArticles')}</h2>
           <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
             {overview?.recentArticles.map((article) => (
               <a
@@ -1173,6 +1175,7 @@ function TrendPanel({
   series: Array<{ label: string; values: number[] }>;
   className?: string;
 }) {
+  const { t } = useTranslation();
   const width = 360;
   const height = 200;
   const paddingTop = 12;
@@ -1202,7 +1205,7 @@ function TrendPanel({
     <div className={`rounded-2xl border border-border bg-background p-3 ${className ?? ''} flex min-h-0 flex-col`}>
       <div className="text-sm font-medium mb-2.5">{title}</div>
       {series.length === 0 || dates.length === 0 ? (
-        <p className="text-sm text-foreground-secondary">Not enough history yet.</p>
+        <p className="text-sm text-foreground-secondary">{t('intelligence.notEnoughHistory')}</p>
       ) : (
         <>
           <svg

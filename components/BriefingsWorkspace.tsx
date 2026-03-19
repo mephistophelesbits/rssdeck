@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { MessageSquare, Sparkles, Newspaper, ScanSearch, Link2, Trash2, Send, Eye, EyeOff, Plus } from 'lucide-react';
+import { Sparkles, Newspaper, ScanSearch, Link2, Trash2, Send, Eye, EyeOff, Plus } from 'lucide-react';
 import { AppChrome } from '@/components/AppChrome';
 import { useSettingsStore } from '@/lib/settings-store';
+import { useTranslation } from '@/lib/i18n';
 
 type PersistedBriefingChatMessage = {
   id: string;
@@ -44,6 +45,7 @@ function TelegramIcon({ className }: { className?: string }) {
 }
 
 export function BriefingsWorkspace() {
+  const { t, locale } = useTranslation();
   const aiSettings = useSettingsStore((state) => state.aiSettings);
   const briefingSettings = useSettingsStore((state) => state.briefingSettings);
   const setBriefingSettings = useSettingsStore((state) => state.setBriefingSettings);
@@ -127,7 +129,7 @@ export function BriefingsWorkspace() {
       const response = await fetch('/api/briefings/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ aiSettings }),
+        body: JSON.stringify({ aiSettings, locale }),
       });
       const briefing = await response.json();
       if (!response.ok) {
@@ -159,6 +161,7 @@ export function BriefingsWorkspace() {
           briefing: selectedBriefing,
           telegramToken: briefingSettings.telegramToken,
           telegramChatId: briefingSettings.telegramChatId,
+          locale,
         }),
       });
       const data = await response.json();
@@ -167,7 +170,7 @@ export function BriefingsWorkspace() {
         throw new Error(data.error || 'Failed to push briefing');
       }
 
-      setWorkspaceMessage('Briefing pushed to Telegram.');
+      setWorkspaceMessage(t('briefings.briefingPushed'));
     } catch (error) {
       setWorkspaceMessage(error instanceof Error ? error.message : 'Failed to push briefing.');
     } finally {
@@ -242,14 +245,14 @@ export function BriefingsWorkspace() {
         onClick={() => setIsAutomationOpen(true)}
         className="px-3 py-1.5 rounded-lg border border-border bg-background text-xs font-medium text-foreground-secondary hover:border-accent hover:text-foreground transition-colors"
       >
-        Brief Automation
+        {t('briefings.briefAutomation')}
       </button>
       <button
         onClick={() => void handleGenerate()}
         disabled={isGenerating}
         className="px-3 py-1.5 rounded-lg bg-accent text-[color:var(--accent-foreground)] text-xs font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors"
       >
-        {isGenerating ? 'Generating…' : 'Generate Briefing'}
+        {isGenerating ? t('briefings.generating') : t('briefings.generateBriefing')}
       </button>
     </>
   );
@@ -274,9 +277,9 @@ export function BriefingsWorkspace() {
         <div className="w-full px-4 py-4 md:px-5 md:py-5">
           <header className="mb-4 flex items-start justify-between gap-3 flex-wrap">
             <div className="min-w-0">
-              <h1 className="text-2xl font-semibold">Briefings</h1>
+              <h1 className="text-2xl font-semibold">{t('briefings.title')}</h1>
               <p className="mt-1 text-xs md:text-sm text-foreground-secondary">
-                Manual-first daily briefs and follow-up chat grounded in the persisted article corpus.
+                {t('briefings.description')}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -293,11 +296,11 @@ export function BriefingsWorkspace() {
 
         <div className="grid gap-4 2xl:grid-cols-[320px_minmax(0,1fr)]">
           <aside className="rounded-2xl border border-border bg-background-secondary p-3 xl:sticky xl:top-4 xl:self-start">
-            <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-foreground-secondary mb-3">Saved Briefings</h2>
+            <h2 className="text-xs font-medium uppercase tracking-[0.18em] text-foreground-secondary mb-3">{t('briefings.savedBriefings')}</h2>
             <div className="space-y-2 xl:max-h-[calc(100vh-220px)] xl:overflow-y-auto pr-1">
               {briefings.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border p-4 text-sm text-foreground-secondary">
-                  No briefings yet. Generate one to create a saved morning desk.
+                  {t('briefings.noBriefingsYet')}
                 </div>
               ) : (
                 briefings.map((briefing) => (
@@ -331,15 +334,15 @@ export function BriefingsWorkspace() {
                           </div>
                         )}
                         <div className="text-xs text-foreground-secondary mt-2">
-                          {briefing.topStories.length} ranked stories
+                          {briefing.topStories.length} {t('briefings.rankedStories')}
                         </div>
                       </button>
                       <button
                         type="button"
                         onClick={() => void handleDeleteBriefing(briefing.id)}
                         className="rounded-lg border border-border bg-background p-2 text-foreground-secondary hover:border-error hover:text-error transition-colors"
-                        title="Delete briefing"
-                        aria-label={`Delete briefing ${briefing.title}`}
+                        title={t('briefings.deleteBriefing')}
+                        aria-label={`${t('briefings.deleteBriefing')} ${briefing.title}`}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -358,38 +361,38 @@ export function BriefingsWorkspace() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <Sparkles className="w-4 h-4 text-accent" />
-                        <span className="text-xs uppercase tracking-[0.22em] text-foreground-secondary">Executive Brief</span>
+                        <span className="text-xs uppercase tracking-[0.22em] text-foreground-secondary">{t('briefings.executiveBrief')}</span>
                       </div>
                       <h2 className="text-xl font-semibold leading-tight">{selectedBriefing.title}</h2>
                       <p className="mt-2 text-sm text-foreground-secondary">
-                        Generated {new Date(selectedBriefing.briefingDate).toLocaleString()} from the stored article corpus.
+                        {t('briefings.generatedFrom', { date: new Date(selectedBriefing.briefingDate).toLocaleString() })}
                       </p>
                     </div>
                     <div className="grid gap-2 sm:grid-cols-3">
                       <div className="rounded-xl border border-border bg-background px-3 py-2.5">
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Stories</div>
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('briefings.stories')}</div>
                         <div className="mt-1 text-lg font-semibold">{selectedBriefing.topStories.length}</div>
                       </div>
                       <div className="rounded-xl border border-border bg-background px-3 py-2.5">
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Themes</div>
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('briefings.themes')}</div>
                         <div className="mt-1 text-lg font-semibold">{selectedBriefing.keyThemes.length}</div>
                       </div>
                       <div className="rounded-xl border border-border bg-background px-3 py-2.5">
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Sources</div>
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('briefings.sources')}</div>
                         <div className="mt-1 text-lg font-semibold">{topSources.length}</div>
                       </div>
                     </div>
                   </div>
                   <div className="mb-4 grid gap-2 xl:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
                     <div className="rounded-xl border border-border bg-background px-3 py-2.5">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Lead Story</div>
-                      <div className="mt-1 text-sm font-medium">{leadStory?.title || 'No lead story selected'}</div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('briefings.leadStory')}</div>
+                      <div className="mt-1 text-sm font-medium">{leadStory?.title || t('briefings.noLeadStory')}</div>
                       {leadStory?.sourceTitle && (
                         <div className="mt-1 text-xs text-foreground-secondary">{leadStory.sourceTitle}</div>
                       )}
                     </div>
                     <div className="rounded-xl border border-border bg-background px-3 py-2.5">
-                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">Theme Stack</div>
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-foreground-secondary">{t('briefings.themeStack')}</div>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {selectedBriefing.keyThemes.slice(0, 6).map((theme) => (
                           <span key={theme} className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs">
@@ -402,7 +405,7 @@ export function BriefingsWorkspace() {
                   <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_320px]">
                     <div className="rounded-2xl border border-border bg-background p-4">
                       <div className="mb-3 flex items-center justify-between gap-3">
-                        <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary">Briefing Notes</div>
+                        <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary">{t('briefings.briefingNotes')}</div>
                         <button
                           type="button"
                           onClick={() => void handlePushToTelegram()}
@@ -412,10 +415,10 @@ export function BriefingsWorkspace() {
                               ? 'border-accent bg-accent/10 text-accent hover:bg-accent/15'
                               : 'border-border bg-background-secondary text-foreground-secondary opacity-70 cursor-not-allowed'
                           }`}
-                          title={isTelegramReady ? 'Push this briefing to Telegram' : 'Configure Telegram in Brief Automation first'}
+                          title={isTelegramReady ? t('briefings.pushThisBriefing') : t('briefings.configureTelegram')}
                         >
                           <TelegramIcon className="w-3.5 h-3.5" />
-                          {isPushingTelegram ? 'Pushing…' : 'Push to Telegram'}
+                          {isPushingTelegram ? t('briefings.pushing') : t('briefings.pushToTelegram')}
                         </button>
                       </div>
                       <div className="prose prose-sm max-w-none text-foreground dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-ul:text-foreground prose-ol:text-foreground prose-a:text-accent">
@@ -424,7 +427,7 @@ export function BriefingsWorkspace() {
                       <div className="mt-5 border-t border-border pt-4">
                         <div className="flex items-center gap-2 mb-3">
                           <ScanSearch className="w-4 h-4 text-accent" />
-                          <h3 className="text-sm font-medium">Chat With Briefing</h3>
+                          <h3 className="text-sm font-medium">{t('briefings.chatWithBriefing')}</h3>
                         </div>
                         <div className="space-y-2.5 mb-3 max-h-[320px] overflow-y-auto rounded-2xl border border-border bg-background-secondary p-3">
                           {chatMessages.map((message, index) => (
@@ -442,7 +445,7 @@ export function BriefingsWorkspace() {
                           ))}
                           {chatMessages.length === 0 && (
                             <div className="rounded-xl border border-dashed border-border p-4 text-sm text-foreground-secondary">
-                              Ask what changed, which stories matter most, or how the themes connect.
+                              {t('briefings.chatEmptyState')}
                             </div>
                           )}
                         </div>
@@ -457,7 +460,7 @@ export function BriefingsWorkspace() {
                                   void handleChat();
                                 }
                               }}
-                              placeholder="Ask about the briefing, themes, or top stories"
+                              placeholder={t('briefings.chatPlaceholder')}
                               className="flex-1 px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:border-accent"
                             />
                             <button
@@ -465,17 +468,17 @@ export function BriefingsWorkspace() {
                               disabled={isChatting || !chatInput.trim()}
                               className="px-3 py-2 rounded-lg bg-accent text-[color:var(--accent-foreground)] text-sm font-medium hover:bg-accent-hover disabled:opacity-50 transition-colors"
                             >
-                              {isChatting ? 'Sending…' : 'Send'}
+                              {isChatting ? t('briefings.sending') : t('briefings.send')}
                             </button>
                           </div>
                           <div className="rounded-2xl border border-border bg-background-secondary p-3">
-                            <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-2.5">Suggested Prompts</div>
+                            <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-2.5">{t('briefings.suggestedPrompts')}</div>
                             <div className="space-y-2">
                               {[
-                                'What are the biggest risks in this briefing?',
-                                'Which two stories are likely to evolve next?',
-                                'Summarize the briefing for a 60-second update.',
-                                'Show how the top themes connect across categories.',
+                                t('briefings.prompt1'),
+                                t('briefings.prompt2'),
+                                t('briefings.prompt3'),
+                                t('briefings.prompt4'),
                               ].map((prompt) => (
                                 <button
                                   key={prompt}
@@ -492,7 +495,7 @@ export function BriefingsWorkspace() {
                     </div>
                     <div className="space-y-3">
                       <div className="rounded-2xl border border-border bg-background p-3">
-                        <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-2.5">What Changed</div>
+                        <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-2.5">{t('briefings.whatChanged')}</div>
                         <div className="space-y-2">
                           {summarySections.slice(0, 3).map((section, index) => (
                             <div key={index} className="rounded-xl border border-border bg-background-secondary px-3 py-2.5 text-sm text-foreground-secondary">
@@ -502,7 +505,7 @@ export function BriefingsWorkspace() {
                         </div>
                       </div>
                       <div className="rounded-2xl border border-border bg-background p-3">
-                        <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-2.5">Top Sources</div>
+                        <div className="text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-2.5">{t('briefings.topSources')}</div>
                         <div className="space-y-2">
                           {topSources.map(([source, count]) => (
                             <div key={source} className="flex items-center justify-between rounded-xl border border-border bg-background-secondary px-3 py-2 text-sm">
@@ -519,14 +522,14 @@ export function BriefingsWorkspace() {
                 <section className="rounded-2xl border border-border bg-background-secondary p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Newspaper className="w-4 h-4 text-accent" />
-                    <h2 className="text-lg font-medium">Ranked Story Board</h2>
+                    <h2 className="text-lg font-medium">{t('briefings.rankedStoryBoard')}</h2>
                   </div>
                   <div className="grid gap-3 2xl:grid-cols-2">
                     {groupedStories.map(([category, stories]) => (
                       <div key={category} className="rounded-2xl border border-border bg-background p-3">
                         <div className="flex items-center justify-between gap-3 mb-3">
                           <div className="font-medium">{category}</div>
-                          <div className="text-xs text-foreground-secondary">{stories.length} stories</div>
+                          <div className="text-xs text-foreground-secondary">{stories.length} {t('briefings.storiesCount')}</div>
                         </div>
                         <div className="space-y-2.5">
                           {stories.map((story, index) => (
@@ -540,10 +543,10 @@ export function BriefingsWorkspace() {
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
                                   <div className="mb-1 flex items-center gap-2 flex-wrap">
-                                    <span className="text-xs text-foreground-secondary">#{index + 1} in {category}</span>
+                                    <span className="text-xs text-foreground-secondary">#{index + 1} {t('briefings.inCategory')} {category}</span>
                                     {index === 0 && (
                                       <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
-                                        Lead
+                                        {t('briefings.lead')}
                                       </span>
                                     )}
                                   </div>
@@ -563,7 +566,7 @@ export function BriefingsWorkspace() {
             ) : (
               <section className="rounded-2xl border border-border bg-background-secondary p-5">
                 <p className="text-sm text-foreground-secondary">
-                  No saved briefings yet. Generate the first manual briefing from the stored article corpus.
+                  {t('briefings.noBriefingsEmpty')}
                 </p>
               </section>
             )}
@@ -578,9 +581,9 @@ export function BriefingsWorkspace() {
           <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-border bg-background-secondary p-4 shadow-2xl mx-4">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold">Brief Automation</h2>
+                <h2 className="text-lg font-semibold">{t('briefings.automationTitle')}</h2>
                 <p className="mt-1 text-sm text-foreground-secondary">
-                  Choose when to auto-generate the daily brief and optionally push the current saved briefing to Telegram.
+                  {t('briefings.automationDescription')}
                 </p>
               </div>
               <button
@@ -588,19 +591,19 @@ export function BriefingsWorkspace() {
                 onClick={() => setIsAutomationOpen(false)}
                 className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground-secondary hover:border-accent hover:text-foreground transition-colors"
               >
-                Close
+                {t('briefings.close')}
               </button>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="rounded-2xl border border-border bg-background p-3">
                 <div className="mb-3 flex items-center justify-between gap-3">
-                  <div className="text-xs uppercase tracking-[0.22em] text-foreground-secondary">Generate Automatically</div>
+                  <div className="text-xs uppercase tracking-[0.22em] text-foreground-secondary">{t('briefings.generateAutomatically')}</div>
                   <button
                     type="button"
                     onClick={() => setBriefingSettings({ enabled: !briefingSettings.enabled })}
                     className={`inline-flex h-6 w-11 items-center rounded-full px-0.5 transition-colors ${briefingSettings.enabled ? 'bg-accent' : 'bg-border'}`}
-                    aria-label="Toggle automatic briefing generation"
+                    aria-label={t('briefings.toggleAutoGeneration')}
                   >
                     <span
                       className={`h-5 w-5 rounded-full bg-white transition-transform ${briefingSettings.enabled ? 'translate-x-5' : 'translate-x-0'}`}
@@ -608,14 +611,14 @@ export function BriefingsWorkspace() {
                   </button>
                 </div>
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="text-xs uppercase tracking-[0.22em] text-foreground-secondary">Schedule Times</div>
+                  <div className="text-xs uppercase tracking-[0.22em] text-foreground-secondary">{t('briefings.scheduleTimes')}</div>
                   <button
                     type="button"
                     onClick={() => setBriefingSettings({ times: [...briefingSettings.times, '09:00'] })}
                     className="inline-flex items-center gap-1 rounded-lg border border-border bg-background-secondary px-2 py-1 text-xs text-foreground-secondary hover:border-accent hover:text-foreground transition-colors"
                   >
                     <Plus className="w-3 h-3" />
-                    Add Time
+                    {t('briefings.addTime')}
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -639,7 +642,7 @@ export function BriefingsWorkspace() {
                             setBriefingSettings({ times: nextTimes });
                           }}
                           className="rounded-lg border border-border bg-background-secondary px-2 py-2 text-foreground-secondary hover:border-error hover:text-error transition-colors"
-                          aria-label="Remove scheduled time"
+                          aria-label={t('briefings.removeTime')}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -648,7 +651,7 @@ export function BriefingsWorkspace() {
                   ))}
                 </div>
                 <p className="mt-2 text-[11px] text-foreground-secondary">
-                  Automatic generation runs when the app is open and the current time passes one of these slots.
+                  {t('briefings.autoGenHelp')}
                 </p>
               </div>
 
@@ -656,13 +659,13 @@ export function BriefingsWorkspace() {
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Send className="w-4 h-4 text-accent" />
-                    <div className="text-sm font-medium">Push to Telegram</div>
+                    <div className="text-sm font-medium">{t('briefings.pushToTelegram')}</div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setBriefingSettings({ telegramEnabled: !briefingSettings.telegramEnabled })}
                     className={`inline-flex h-6 w-11 items-center rounded-full px-0.5 transition-colors ${briefingSettings.telegramEnabled ? 'bg-accent' : 'bg-border'}`}
-                    aria-label="Toggle Telegram push"
+                    aria-label={t('briefings.toggleTelegram')}
                   >
                     <span
                       className={`h-5 w-5 rounded-full bg-white transition-transform ${briefingSettings.telegramEnabled ? 'translate-x-5' : 'translate-x-0'}`}
@@ -673,37 +676,37 @@ export function BriefingsWorkspace() {
                 {briefingSettings.telegramEnabled && (
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-foreground-secondary">Bot Token</label>
+                      <label className="mb-1 block text-xs font-medium text-foreground-secondary">{t('briefings.botToken')}</label>
                       <div className="relative">
                         <input
                           type={showTelegramToken ? 'text' : 'password'}
                           value={briefingSettings.telegramToken}
                           onChange={(event) => setBriefingSettings({ telegramToken: event.target.value })}
-                          placeholder="123456:ABC-DEF..."
+                          placeholder={t('briefings.botTokenPlaceholder')}
                           className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 pr-10 text-sm focus:border-accent focus:outline-none"
                         />
                         <button
                           type="button"
                           onClick={() => setShowTelegramToken((current) => !current)}
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-secondary hover:text-foreground"
-                          aria-label={showTelegramToken ? 'Hide Telegram token' : 'Show Telegram token'}
+                          aria-label={showTelegramToken ? t('briefings.hideTelegramToken') : t('briefings.showTelegramToken')}
                         >
                           {showTelegramToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
                     </div>
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-foreground-secondary">Chat ID</label>
+                      <label className="mb-1 block text-xs font-medium text-foreground-secondary">{t('briefings.chatId')}</label>
                       <input
                         type="text"
                         value={briefingSettings.telegramChatId}
                         onChange={(event) => setBriefingSettings({ telegramChatId: event.target.value })}
-                        placeholder="e.g. 123456789"
+                        placeholder={t('briefings.chatIdPlaceholder')}
                         className="w-full rounded-lg border border-border bg-background-secondary px-3 py-2 text-sm focus:border-accent focus:outline-none"
                       />
                     </div>
                     <p className="text-[11px] text-foreground-secondary">
-                      The pushed message uses the current saved briefing summary and top stories.
+                      {t('briefings.telegramHelp')}
                     </p>
                     <button
                       type="button"
@@ -712,7 +715,7 @@ export function BriefingsWorkspace() {
                       className="inline-flex items-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] hover:bg-accent-hover disabled:opacity-50 transition-colors"
                     >
                       <Send className="w-4 h-4" />
-                      {isPushingTelegram ? 'Pushing…' : 'Push Current Briefing'}
+                      {isPushingTelegram ? t('briefings.pushing') : t('briefings.pushCurrentBriefing')}
                     </button>
                   </div>
                 )}

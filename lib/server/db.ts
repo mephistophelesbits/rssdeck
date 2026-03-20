@@ -104,6 +104,16 @@ function initializeDatabase(db: DatabaseSync) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS saved_search_results (
+      id TEXT PRIMARY KEY,
+      search_rule_id TEXT NOT NULL,
+      article_json TEXT NOT NULL,
+      matched_terms_json TEXT NOT NULL,
+      relevance_score REAL NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(search_rule_id) REFERENCES search_rules(id) ON DELETE CASCADE
+    );
+
     CREATE TABLE IF NOT EXISTS briefing_chat_messages (
       id TEXT PRIMARY KEY,
       briefing_id TEXT NOT NULL,

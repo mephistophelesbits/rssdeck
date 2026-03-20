@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Rss, BrainCircuit, Newspaper, Bookmark, Search, Moon, Sun } from 'lucide-react';
+import { Rss, LayoutDashboard, Newspaper, Search, Bookmark, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
 import { useSettingsStore } from '@/lib/settings-store';
@@ -15,9 +15,9 @@ interface TopNavBarProps {
 
 const NAV_ITEMS = [
   { href: '/', labelKey: 'nav.rss', icon: Rss },
-  { href: '/intelligence', labelKey: 'nav.intelligence', icon: BrainCircuit },
+  { href: '/intelligence', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { href: '/briefings', labelKey: 'nav.briefings', icon: Newspaper },
-  { href: '/bookmarks', labelKey: 'nav.bookmarks', icon: Bookmark },
+  { href: '/search', labelKey: 'nav.search', icon: Search },
 ];
 
 export function TopNavBar({ pageActions }: TopNavBarProps) {
@@ -35,8 +35,8 @@ export function TopNavBar({ pageActions }: TopNavBarProps) {
     router.prefetch('/');
     router.prefetch('/intelligence');
     router.prefetch('/briefings');
-    router.prefetch('/bookmarks');
     router.prefetch('/search');
+    router.prefetch('/bookmarks');
   }, [router]);
 
   const prefetchRoute = (href: string) => {
@@ -100,11 +100,6 @@ export function TopNavBar({ pageActions }: TopNavBarProps) {
             >
               <div className="relative">
                 <Icon className={cn("w-5 h-5", active && "mb-[1px]")} strokeWidth={active ? 2.5 : 2} />
-                {item.href === '/bookmarks' && bookmarkCount > 0 && (
-                  <span className="absolute -top-1 -right-2 min-w-[16px] h-[16px] bg-warning text-background text-[10px] font-bold rounded-full flex items-center justify-center px-1">
-                    {bookmarkCount > 99 ? '99+' : bookmarkCount}
-                  </span>
-                )}
               </div>
               <span className={cn("text-[10px] uppercase font-semibold tracking-wider", active ? "text-accent" : "hidden md:block")}>
                 {t(item.labelKey)}
@@ -124,19 +119,24 @@ export function TopNavBar({ pageActions }: TopNavBarProps) {
         )}
 
         <Link
-          href="/search"
+          href="/bookmarks"
           prefetch
-          title={t('nav.search')}
+          title={t('nav.bookmarks')}
           className={cn(
-            'w-9 h-9 flex items-center justify-center rounded-full transition-colors',
-            pathname === '/search'
+            'relative w-9 h-9 flex items-center justify-center rounded-full transition-colors',
+            pathname === '/bookmarks'
               ? 'bg-accent/10 text-accent'
               : 'text-foreground-secondary hover:bg-background-tertiary hover:text-foreground'
           )}
-          onMouseEnter={() => prefetchRoute('/search')}
-          onFocus={() => prefetchRoute('/search')}
+          onMouseEnter={() => prefetchRoute('/bookmarks')}
+          onFocus={() => prefetchRoute('/bookmarks')}
         >
-          <Search className="w-4 h-4" />
+          <Bookmark className="w-4 h-4" />
+          {bookmarkCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] bg-warning text-background text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+              {bookmarkCount > 99 ? '99+' : bookmarkCount}
+            </span>
+          )}
         </Link>
 
         <button

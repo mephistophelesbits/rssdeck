@@ -2,6 +2,7 @@
   "nav": {
     "rss": "RSS",
     "intelligence": "Intelligence",
+    "dashboard": "Dashboard",
     "briefings": "Briefings",
     "bookmarks": "Bookmarks",
     "search": "Search",
@@ -136,7 +137,19 @@
     "enterKeywords": "Enter one or more keywords separated by commas.",
     "runBeforeSaving": "Run or enter a search before saving it.",
     "searchRuleSaved": "Search rule saved locally.",
-    "refreshResults": "Refresh search results"
+    "refreshResults": "Refresh search results",
+    "saveResults": "Save Results",
+    "saveResultsToDatabase": "Save all search results to database",
+    "noResultsToSave": "No search results to save. Run a search first.",
+    "resultsSavedCount": "Saved {count} results to database",
+    "selectRuleFirst": "Save the search rule first before generating a briefing",
+    "createBriefing": "Create Briefing",
+    "generateBriefingFromSearch": "Generate AI briefing from saved search results",
+    "generating": "Generating…",
+    "briefingGeneratedSuccess": "Briefing generated successfully! Check the briefings page.",
+    "sortBy": "Sort by",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first"
   },
   "addFeed": {
     "title": "Add Feed",

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Search, Save, Trash2, ExternalLink, Database, RefreshCw } from 'lucide-react';
+import { Search, Save, Trash2, ExternalLink, Database, RefreshCw, BookOpen } from 'lucide-react';
 import { AppChrome } from '@/components/AppChrome';
 import { ArticlePreviewPanel } from '@/components/ui/ArticlePreviewPanel';
 import { RelativeTime } from '@/components/ui/RelativeTime';
@@ -46,8 +46,20 @@ export function SearchWorkspace() {
   const [isSaving, setIsSaving] = useState(false);
   const [workspaceMessage, setWorkspaceMessage] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [isSavingResults, setIsSavingResults] = useState(false);
+  const [isGeneratingBriefing, setIsGeneratingBriefing] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const selectedRule = savedRules.find((rule) => rule.id === selectedRuleId) ?? null;
+
+  // Sort results based on selected order
+  const sortedResults = [...results].sort((a, b) => {
+    if (sortOrder === 'newest') {
+      return new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime();
+    } else {
+      return new Date(a.publishedAt || 0).getTime() - new Date(b.publishedAt || 0).getTime();
+    }
+  });
 
   useEffect(() => {
     void loadRules();
@@ -170,6 +182,69 @@ export function SearchWorkspace() {
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.error || 'Failed to refresh saved feeds');
+    }
+  };
+
+  const handleSaveResults = async () => {
+    if (!selectedRuleId || !results.length) {
+      setWorkspaceMessage(t('search.noResultsToSave'));
+      return;
+    }
+
+    setIsSavingResults(true);
+    setWorkspaceMessage(null);
+
+    try {
+      const response = await fetch('/api/search/save-results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          searchRuleId: selectedRuleId,
+          results,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to save results');
+      }
+
+      setWorkspaceMessage(t('search.resultsSavedCount', { count: data.count }));
+    } catch (error) {
+      setWorkspaceMessage(error instanceof Error ? error.message : 'Failed to save results');
+    } finally {
+      setIsSavingResults(false);
+    }
+  };
+
+  const handleGenerateBriefing = async () => {
+    if (!selectedRuleId) {
+      setWorkspaceMessage(t('search.selectRuleFirst'));
+      return;
+    }
+
+    setIsGeneratingBriefing(true);
+    setWorkspaceMessage(null);
+
+    try {
+      const response = await fetch('/api/search/generate-briefing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          searchRuleId: selectedRuleId,
+          briefingTitle: selectedRule?.name ? `Briefing: ${selectedRule.name}` : undefined,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate briefing');
+      }
+
+      setWorkspaceMessage(t('search.briefingGeneratedSuccess'));
+      // Could redirect to briefings page here or show the generated briefing
+    } catch (error) {
+      setWorkspaceMessage(error instanceof Error ? error.message : 'Failed to generate briefing');
+    } finally {
+      setIsGeneratingBriefing(false);
     }
   };
 
@@ -309,6 +384,29 @@ export function SearchWorkspace() {
                 </button>
               </div>
 
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleSaveResults()}
+                  disabled={isSavingResults || !selectedRuleId || results.length === 0}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-foreground-secondary transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  title={t('search.saveResultsToDatabase')}
+                >
+                  <Database className="h-4 w-4" />
+                  {isSavingResults ? t('search.saving') : t('search.saveResults')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleGenerateBriefing()}
+                  disabled={isGeneratingBriefing || !selectedRuleId}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-foreground-secondary transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  title={t('search.generateBriefingFromSearch')}
+                >
+                  <BookOpen className="h-4 w-4" />
+                  {isGeneratingBriefing ? t('search.generating') : t('search.createBriefing')}
+                </button>
+              </div>
+
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {keywords.map((keyword) => (
                   <span key={keyword} className="rounded-full border border-border bg-background px-2.5 py-1 text-xs text-foreground-secondary">
@@ -336,8 +434,20 @@ export function SearchWorkspace() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
-                  {results.map((result, index) => (
+                <>
+                  <div className="sticky top-0 border-b border-border bg-background-secondary/95 px-5 py-3 flex items-center justify-end gap-2">
+                    <label className="text-xs font-medium text-foreground-secondary">{t('search.sortBy')}:</label>
+                    <select
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value as 'newest' | 'oldest')}
+                      className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-accent focus:outline-none"
+                    >
+                      <option value="newest">{t('search.sortNewest')}</option>
+                      <option value="oldest">{t('search.sortOldest')}</option>
+                    </select>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {sortedResults.map((result, index) => (
                     <button
                       key={result.id}
                       type="button"
@@ -386,8 +496,9 @@ export function SearchWorkspace() {
                         </div>
                       </div>
                     </button>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </div>

@@ -2,6 +2,7 @@
   "nav": {
     "rss": "RSS",
     "intelligence": "情报",
+    "dashboard": "仪表盘",
     "briefings": "简报",
     "bookmarks": "收藏",
     "search": "搜索",
@@ -136,7 +137,19 @@
     "enterKeywords": "请输入一个或多个以逗号分隔的关键词。",
     "runBeforeSaving": "请先运行或输入搜索再保存。",
     "searchRuleSaved": "搜索规则已本地保存。",
-    "refreshResults": "刷新搜索结果"
+    "refreshResults": "刷新搜索结果",
+    "saveResults": "保存结果",
+    "saveResultsToDatabase": "将所有搜索结果保存到数据库",
+    "noResultsToSave": "没有搜索结果可保存。请先运行搜索。",
+    "resultsSavedCount": "已保存 {count} 条结果到数据库",
+    "selectRuleFirst": "在生成简报前请先保存搜索规则",
+    "createBriefing": "创建简报",
+    "generateBriefingFromSearch": "根据搜索结果生成 AI 简报",
+    "generating": "生成中…",
+    "briefingGeneratedSuccess": "简报生成成功！请查看简报页面。",
+    "sortBy": "排序方式",
+    "sortNewest": "最新优先",
+    "sortOldest": "最旧优先"
   },
   "addFeed": {
     "title": "添加订阅源",

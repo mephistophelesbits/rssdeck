@@ -40,7 +40,7 @@ All changes are in `lib/settings-store.ts`, in the `themes` array, `stitch-dark`
 - **Electric cyan `#00e5ff`** is the signature gamer accent — highly saturated, high contrast against dark backgrounds, universally associated with cyberpunk/sci-fi UI aesthetics.
 - **Deep violet borders `#1e1e3a`** reinforce the cool-toned palette without competing with the cyan accent.
 - **`backgroundTertiary: '#050510'`** is intentionally the darkest surface — used for the inline reading column and overlays — creating clear visual depth hierarchy (columns sit above the reading panel).
-- **`accentForeground: '#000000'`** is required because white text on `#00e5ff` fails WCAG AA contrast; black passes.
+- **`accentForeground: '#000000'`** is set explicitly to ensure pure black text on cyan buttons. `ThemeProvider.tsx` has a `getReadableAccentForeground` fallback that auto-computes a dark foreground from the accent colour, but it yields `#111827` (dark grey) for `#00e5ff`. Setting the field explicitly overrides the fallback and gives a cleaner `#000000` black.
 - The theme `id` is preserved to avoid breaking persisted user preferences.
 
 ---

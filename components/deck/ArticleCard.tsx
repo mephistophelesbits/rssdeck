@@ -22,7 +22,13 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
   const { t } = useTranslation();
   const { isBookmarked, toggleBookmark } = useBookmarksStore();
   const bookmarked = isBookmarked(article.id);
-  const { aiSettings } = useSettingsStore();
+  const { aiSettings, keywordAlerts } = useSettingsStore();
+  const matchedAlert = keywordAlerts
+    .filter(a => a.enabled)
+    .find(a => {
+      const escaped = a.keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`\\b${escaped}\\b`, 'i').test(article.title);
+    });
 
   const [summary, setSummary] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -108,12 +114,26 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
 
             <h3
               className={cn(
-                'font-medium text-foreground group-hover:text-accent transition-colors line-clamp-2 pr-6',
+                'font-medium transition-colors line-clamp-2 pr-6',
+                !matchedAlert && 'text-foreground group-hover:text-accent',
                 viewMode === 'compact' ? 'text-sm' : 'text-base'
               )}
+              style={matchedAlert ? { color: matchedAlert.color } : undefined}
             >
               {decodeHtml(article.title)}
             </h3>
+            {matchedAlert && (
+              <span
+                style={{
+                  background: matchedAlert.color + '22',
+                  color: matchedAlert.color,
+                  border: `1px solid ${matchedAlert.color}55`,
+                }}
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 mt-0.5"
+              >
+                {matchedAlert.keyword}
+              </span>
+            )}
           </div>
           {article.contentSnippet && viewMode === 'comfortable' && (
             <p className="text-sm text-foreground-secondary mt-1 line-clamp-2">

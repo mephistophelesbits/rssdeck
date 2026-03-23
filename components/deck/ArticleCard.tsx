@@ -114,7 +114,7 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
 
             <h3
               className={cn(
-                'font-medium transition-colors line-clamp-2 pr-6',
+                'font-medium transition-colors line-clamp-2 flex-1',
                 !matchedAlert && 'text-foreground group-hover:text-accent',
                 viewMode === 'compact' ? 'text-sm' : 'text-base'
               )}

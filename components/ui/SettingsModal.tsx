@@ -354,7 +354,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         )} />
                       </button>
                       {/* Color swatch */}
-                      <label className="w-7 h-7 rounded cursor-pointer flex-shrink-0 border border-border overflow-hidden" title="Change color">
+                      <label className="relative w-7 h-7 rounded cursor-pointer flex-shrink-0 border border-border overflow-hidden" title="Change color">
                         <input
                           type="color"
                           value={alert.color}

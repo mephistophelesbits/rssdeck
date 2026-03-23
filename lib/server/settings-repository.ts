@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { getDb } from './db';
+import type { KeywordAlert } from '@/lib/types';
 
 export type PersistedSettings = {
   themeId: string;
@@ -26,6 +27,7 @@ export type PersistedSettings = {
     telegramChatId: string;
     lastGenerated: string | null;
   };
+  keywordAlerts: KeywordAlert[];
 };
 
 const SETTINGS_ID = 'global';

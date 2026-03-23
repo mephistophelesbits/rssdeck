@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { KeywordAlert } from '@/lib/types';
 
 export interface ThemeColors {
   id: string;
@@ -88,6 +89,8 @@ interface SettingsState {
     lastGenerated: string | null;
   };
   setBriefingSettings: (settings: Partial<SettingsState['briefingSettings']>) => void;
+  keywordAlerts: KeywordAlert[];
+  setKeywordAlerts: (alerts: KeywordAlert[]) => void;
   hydrateSettings: (settings: SettingsSnapshot) => void;
 }
 
@@ -101,6 +104,7 @@ export type SettingsSnapshot = Pick<
   | 'locale'
   | 'aiSettings'
   | 'briefingSettings'
+  | 'keywordAlerts'
 >;
 
 export function getDefaultSettingsSnapshot(): SettingsSnapshot {
@@ -129,6 +133,7 @@ export function getDefaultSettingsSnapshot(): SettingsSnapshot {
       telegramChatId: '',
       lastGenerated: null,
     },
+    keywordAlerts: [],
   };
 }
 
@@ -142,6 +147,7 @@ function toSettingsSnapshot(state: SettingsState): SettingsSnapshot {
     locale: state.locale,
     aiSettings: state.aiSettings,
     briefingSettings: state.briefingSettings,
+    keywordAlerts: state.keywordAlerts,
   };
 }
 
@@ -198,6 +204,12 @@ export const useSettingsStore = create<SettingsState>()((set) => ({
       const briefingSettings = { ...state.briefingSettings, ...newSettings };
       persistSettings(toSettingsSnapshot({ ...state, briefingSettings }));
       return { briefingSettings };
+    }),
+  setKeywordAlerts: (alerts) =>
+    set((state) => {
+      const keywordAlerts = alerts;
+      persistSettings(toSettingsSnapshot({ ...state, keywordAlerts }));
+      return { keywordAlerts };
     }),
   setLocale: (locale) =>
     set((state) => {

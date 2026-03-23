@@ -47,3 +47,10 @@ export interface DeckStateSnapshot {
   columns: Column[];
   savedFeeds: FeedSource[];
 }
+
+export interface KeywordAlert {
+  id: string;       // nanoid — stable React key, survives keyword edits
+  keyword: string;  // stored as entered; matching is case-insensitive
+  color: string;    // hex color string, e.g. "#ff4444"
+  enabled: boolean; // false = skip during matching but keep in list
+}

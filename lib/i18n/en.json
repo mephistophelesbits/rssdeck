@@ -110,7 +110,14 @@
     "failed": "Failed",
     "connectionSuccessful": "Connection successful!",
     "requestTimedOut": "Request timed out (15s)",
-    "settingsSavedAuto": "Settings are saved automatically"
+    "settingsSavedAuto": "Settings are saved automatically",
+    "keywordAlerts": {
+      "tab": "Keyword Alerts",
+      "description": "Highlight article titles that contain these keywords.",
+      "placeholder": "Keyword (e.g. bitcoin)",
+      "add": "Add",
+      "empty": "No keyword alerts yet."
+    }
   },
   "search": {
     "title": "Search",

@@ -110,7 +110,14 @@
     "failed": "失败",
     "connectionSuccessful": "连接成功！",
     "requestTimedOut": "请求超时（15秒）",
-    "settingsSavedAuto": "设置自动保存"
+    "settingsSavedAuto": "设置自动保存",
+    "keywordAlerts": {
+      "tab": "关键词提醒",
+      "description": "当文章标题包含这些关键词时高亮显示。",
+      "placeholder": "关键词（如 bitcoin）",
+      "add": "添加",
+      "empty": "暂无关键词提醒。"
+    }
   },
   "search": {
     "title": "搜索",

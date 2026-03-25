@@ -13,6 +13,8 @@ type ColumnRow = {
   refresh_interval: number;
   view_mode: Column['settings']['viewMode'];
   sources_json: string;
+  feed_list_id: string | null;
+  search_rule_id: string | null;
 };
 
 type FeedRow = {
@@ -40,8 +42,8 @@ export function createColumn(column: Column) {
 
   db.prepare(`
     INSERT INTO columns_state (
-      id, title, type, width, position, refresh_interval, view_mode, sources_json, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, title, type, width, position, refresh_interval, view_mode, sources_json, feed_list_id, search_rule_id, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     column.id,
     column.title,
@@ -51,6 +53,8 @@ export function createColumn(column: Column) {
     column.settings.refreshInterval,
     column.settings.viewMode,
     JSON.stringify(column.sources),
+    column.feedListId ?? null,
+    column.searchRuleId ?? null,
     now,
     now
   );
@@ -81,7 +85,7 @@ export function updateColumn(columnId: string, updates: Partial<Column>) {
   const now = new Date().toISOString();
   db.prepare(`
     UPDATE columns_state
-    SET title = ?, type = ?, width = ?, refresh_interval = ?, view_mode = ?, sources_json = ?, updated_at = ?
+    SET title = ?, type = ?, width = ?, refresh_interval = ?, view_mode = ?, sources_json = ?, feed_list_id = ?, search_rule_id = ?, updated_at = ?
     WHERE id = ?
   `).run(
     nextColumn.title,
@@ -90,6 +94,8 @@ export function updateColumn(columnId: string, updates: Partial<Column>) {
     nextColumn.settings.refreshInterval,
     nextColumn.settings.viewMode,
     JSON.stringify(nextColumn.sources),
+    nextColumn.feedListId ?? null,
+    nextColumn.searchRuleId ?? null,
     now,
     columnId
   );
@@ -203,7 +209,7 @@ export function recordFeedFetchResult(
 function getColumns() {
   const db = getDb();
   const rows = db.prepare(`
-    SELECT id, title, type, width, position, refresh_interval, view_mode, sources_json
+    SELECT id, title, type, width, position, refresh_interval, view_mode, sources_json, feed_list_id, search_rule_id
     FROM columns_state
     ORDER BY position ASC, created_at ASC
   `).all() as ColumnRow[];
@@ -214,6 +220,8 @@ function getColumns() {
     type: row.type,
     width: row.width,
     sources: JSON.parse(row.sources_json) as FeedSource[],
+    feedListId: row.feed_list_id ?? undefined,
+    searchRuleId: row.search_rule_id ?? undefined,
     settings: {
       refreshInterval: row.refresh_interval,
       viewMode: row.view_mode,

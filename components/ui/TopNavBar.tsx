@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Rss, LayoutDashboard, Newspaper, Search, Bookmark, Moon, Sun } from 'lucide-react';
+import { Rss, LayoutDashboard, Newspaper, Search, Bookmark, Moon, Sun, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
 import { useSettingsStore } from '@/lib/settings-store';
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { href: '/intelligence', labelKey: 'nav.dashboard', icon: LayoutDashboard },
   { href: '/briefings', labelKey: 'nav.briefings', icon: Newspaper },
   { href: '/search', labelKey: 'nav.search', icon: Search },
+  { href: '/lists', labelKey: 'nav.lists', icon: List },
 ];
 
 export function TopNavBar({ pageActions }: TopNavBarProps) {
@@ -37,6 +38,7 @@ export function TopNavBar({ pageActions }: TopNavBarProps) {
     router.prefetch('/briefings');
     router.prefetch('/search');
     router.prefetch('/bookmarks');
+    router.prefetch('/lists');
   }, [router]);
 
   const prefetchRoute = (href: string) => {

@@ -192,6 +192,27 @@ function initializeDatabase(db: DatabaseSync) {
       FOREIGN KEY(theme_id) REFERENCES themes(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS feed_lists (
+      id         TEXT PRIMARY KEY,
+      name       TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS feed_list_items (
+      id         TEXT PRIMARY KEY,
+      list_id    TEXT NOT NULL REFERENCES feed_lists(id) ON DELETE CASCADE,
+      feed_id    TEXT NOT NULL REFERENCES saved_feeds(id) ON DELETE CASCADE,
+      position   INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_feed_list_items_list_feed
+      ON feed_list_items(list_id, feed_id);
+
+    CREATE INDEX IF NOT EXISTS idx_feed_list_items_list_id
+      ON feed_list_items(list_id, position);
+
     CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_canonical_url ON articles(canonical_url);
     CREATE INDEX IF NOT EXISTS idx_articles_updated_at ON articles(updated_at);
     CREATE INDEX IF NOT EXISTS idx_briefings_briefing_date ON briefings(briefing_date);
@@ -205,6 +226,8 @@ function initializeDatabase(db: DatabaseSync) {
   ensureColumn(db, 'saved_feeds', 'site_url', 'TEXT');
   ensureColumn(db, 'saved_feeds', 'last_fetched_at', 'TEXT');
   ensureColumn(db, 'saved_feeds', 'last_error', 'TEXT');
+  ensureColumn(db, 'columns_state', 'feed_list_id', 'TEXT');
+  ensureColumn(db, 'columns_state', 'search_rule_id', 'TEXT');
 }
 
 function ensureColumn(db: DatabaseSync, tableName: string, columnName: string, columnDefinition: string) {

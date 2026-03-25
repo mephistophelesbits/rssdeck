@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { X, Loader2, Check, Link2, Folder, Plus, Columns, Trash2, Upload, FileText } from 'lucide-react';
+import { useRef, useState, useEffect } from 'react';
+import { X, Loader2, Check, Link2, Folder, Plus, Columns, Trash2, Upload, FileText, List, Search, CircleDot } from 'lucide-react';
 import { useDeckStore, DEFAULT_COLUMN_WIDTH } from '@/lib/store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { categories, Category } from '@/lib/categories';
@@ -14,7 +14,7 @@ import {
   getOpmlExportUrl,
   updateColumnRequest,
 } from '@/lib/deck-client';
-import { DeckStateSnapshot, FeedSource } from '@/lib/types';
+import { DeckStateSnapshot, FeedSource, FeedList, SearchRule } from '@/lib/types';
 import { cn, generateId } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 
@@ -23,7 +23,7 @@ interface AddFeedModalProps {
   onClose: () => void;
 }
 
-type Tab = 'url' | 'categories' | 'opml';
+type Tab = 'url' | 'categories' | 'opml' | 'lists' | 'search';
 type TargetType = 'new' | string;
 
 async function getApiError(response: Response, fallback: string) {
@@ -51,11 +51,119 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // New state for list and search columns
+  const [feedLists, setFeedLists] = useState<FeedList[]>([]);
+  const [searchRules, setSearchRules] = useState<SearchRule[]>([]);
+  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [selectedSearchRuleId, setSelectedSearchRuleId] = useState<string | null>(null);
+  const [newListName, setNewListName] = useState('');
+  const [isCreatingList, setIsCreatingList] = useState(false);
+  const [listColumnTitle, setListColumnTitle] = useState('');
+  const [searchColumnTitle, setSearchColumnTitle] = useState('');
+
+  // Fetch feed lists and search rules when switching to those tabs
+  useEffect(() => {
+    if (activeTab === 'lists') {
+      fetch('/api/lists')
+        .then(res => res.json())
+        .then(data => setFeedLists(data))
+        .catch(err => console.error('Failed to fetch feed lists:', err));
+    } else if (activeTab === 'search') {
+      fetch('/api/search/rules')
+        .then(res => res.json())
+        .then(data => setSearchRules(data))
+        .catch(err => console.error('Failed to fetch search rules:', err));
+    }
+  }, [activeTab]);
+
+  // Auto-fill column title when selection changes
+  useEffect(() => {
+    if (selectedListId) {
+      const list = feedLists.find(l => l.id === selectedListId);
+      if (list) setListColumnTitle(list.name);
+    }
+  }, [selectedListId, feedLists]);
+
+  useEffect(() => {
+    if (selectedSearchRuleId) {
+      const rule = searchRules.find(r => r.id === selectedSearchRuleId);
+      if (rule) setSearchColumnTitle(rule.name || rule.query);
+    }
+  }, [selectedSearchRuleId, searchRules]);
+
   const columns = useDeckStore((state) => state.columns);
   const savedFeeds = useDeckStore((state) => state.savedFeeds);
   const setColumns = useDeckStore((state) => state.setColumns);
   const setSavedFeeds = useDeckStore((state) => state.setSavedFeeds);
   const { defaultRefreshInterval, defaultViewMode } = useSettingsStore();
+
+  const handleCreateListColumn = async () => {
+    if (!selectedListId) return;
+
+    try {
+      const title = listColumnTitle.trim() || feedLists.find(l => l.id === selectedListId)?.name || 'List Column';
+      applyDeckState(await createColumnRequest({
+        id: generateId(),
+        title,
+        type: 'list',
+        sources: [],
+        feedListId: selectedListId,
+        settings: {
+          refreshInterval: defaultRefreshInterval,
+          viewMode: defaultViewMode,
+        },
+        width: DEFAULT_COLUMN_WIDTH,
+      }));
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCreateSearchColumn = async () => {
+    if (!selectedSearchRuleId) return;
+
+    try {
+      const rule = searchRules.find(r => r.id === selectedSearchRuleId);
+      const title = searchColumnTitle.trim() || rule?.name || rule?.query || 'Search Column';
+      applyDeckState(await createColumnRequest({
+        id: generateId(),
+        title,
+        type: 'search',
+        sources: [],
+        searchRuleId: selectedSearchRuleId,
+        settings: {
+          refreshInterval: defaultRefreshInterval,
+          viewMode: defaultViewMode,
+        },
+        width: DEFAULT_COLUMN_WIDTH,
+      }));
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCreateNewList = async () => {
+    if (!newListName.trim()) return;
+
+    setIsCreatingList(true);
+    try {
+      const res = await fetch('/api/lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newListName }),
+      });
+      const newList = await res.json();
+      setFeedLists(prev => [...prev, newList]);
+      setSelectedListId(newList.id);
+      setNewListName('');
+      setIsCreatingList(false);
+    } catch (error) {
+      console.error(error);
+      setIsCreatingList(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -304,11 +412,11 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
           </div>
         </div>
 
-        <div className="flex border-b border-border flex-shrink-0">
+        <div className="flex border-b border-border flex-shrink-0 overflow-x-auto">
           <button
             onClick={() => setActiveTab('categories')}
             className={cn(
-              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2',
+              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 min-w-[80px]',
               activeTab === 'categories'
                 ? 'text-accent border-b-2 border-accent'
                 : 'text-foreground-secondary hover:text-foreground'
@@ -320,7 +428,7 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
           <button
             onClick={() => setActiveTab('url')}
             className={cn(
-              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2',
+              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 min-w-[80px]',
               activeTab === 'url'
                 ? 'text-accent border-b-2 border-accent'
                 : 'text-foreground-secondary hover:text-foreground'
@@ -330,9 +438,33 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
             {t('addFeed.customUrl')}
           </button>
           <button
+            onClick={() => setActiveTab('lists')}
+            className={cn(
+              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 min-w-[80px]',
+              activeTab === 'lists'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-foreground-secondary hover:text-foreground'
+            )}
+          >
+            <List className="w-4 h-4" />
+            {t('addFeed.fromList') || 'From List'}
+          </button>
+          <button
+            onClick={() => setActiveTab('search')}
+            className={cn(
+              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 min-w-[80px]',
+              activeTab === 'search'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-foreground-secondary hover:text-foreground'
+            )}
+          >
+            <Search className="w-4 h-4" />
+            {t('addFeed.searchRule') || 'Search'}
+          </button>
+          <button
             onClick={() => setActiveTab('opml')}
             className={cn(
-              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2',
+              'flex-1 px-4 py-2.5 text-sm font-medium transition-colors flex items-center justify-center gap-2 min-w-[80px]',
               activeTab === 'opml'
                 ? 'text-accent border-b-2 border-accent'
                 : 'text-foreground-secondary hover:text-foreground'
@@ -555,6 +687,195 @@ export function AddFeedModal({ isOpen, onClose }: AddFeedModalProps) {
                   <p className="text-xs text-foreground-secondary text-center">
                     {t('addFeed.importHelp')}
                   </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'lists' && (
+            <div className="space-y-4">
+              <div className="text-sm text-foreground-secondary mb-4">
+                Select a feed list to create a column. The column will show articles from all feeds in the list.
+              </div>
+
+              {feedLists.length === 0 && !newListName && (
+                <div className="text-center py-8 text-foreground-secondary">
+                  <List className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No feed lists yet</p>
+                  <p className="text-xs mt-1">Create one below to get started</p>
+                </div>
+              )}
+
+              <div className="space-y-2 max-h-[240px] overflow-y-auto">
+                {feedLists.map((list) => (
+                  <button
+                    key={list.id}
+                    onClick={() => setSelectedListId(list.id)}
+                    className={cn(
+                      'w-full p-3 rounded-lg border text-left transition-all',
+                      selectedListId === list.id
+                        ? 'border-accent bg-accent/10'
+                        : 'border-border hover:border-accent hover:bg-background-tertiary'
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                        selectedListId === list.id
+                          ? 'border-accent bg-accent'
+                          : 'border-border'
+                      )}>
+                        {selectedListId === list.id && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">{list.name}</div>
+                        <div className="text-xs text-foreground-secondary">
+                          {list.feedCount} {list.feedCount === 1 ? 'feed' : 'feeds'}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Create new list inline */}
+              <div className="border-t border-border pt-4">
+                {newListName ? (
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="text"
+                      value={newListName}
+                      onChange={(e) => setNewListName(e.target.value)}
+                      placeholder="List name"
+                      className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') void handleCreateNewList();
+                        if (e.key === 'Escape') setNewListName('');
+                      }}
+                    />
+                    <button
+                      onClick={() => void handleCreateNewList()}
+                      disabled={isCreatingList || !newListName.trim()}
+                      className="px-4 py-2 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white rounded-lg text-sm transition-colors"
+                    >
+                      {isCreatingList ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                    </button>
+                    <button
+                      onClick={() => setNewListName('')}
+                      className="p-2 text-foreground-secondary hover:text-foreground rounded-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setNewListName('')}
+                    className="w-full p-3 rounded-lg border-2 border-dashed border-border hover:border-accent text-foreground-secondary hover:text-accent text-sm text-center transition-colors"
+                  >
+                    <Plus className="w-4 h-4 inline mr-2" />
+                    Create new list...
+                  </button>
+                )}
+              </div>
+
+              {selectedListId && (
+                <div className="space-y-3 border-t border-border pt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Column title</label>
+                    <input
+                      type="text"
+                      value={listColumnTitle}
+                      onChange={(e) => setListColumnTitle(e.target.value)}
+                      placeholder="Enter column title"
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                  <button
+                    onClick={() => void handleCreateListColumn()}
+                    className="w-full py-2.5 bg-accent hover:bg-accent-hover text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <CircleDot className="w-4 h-4" />
+                    Create Column from List
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'search' && (
+            <div className="space-y-4">
+              <div className="text-sm text-foreground-secondary mb-4">
+                Select a search rule to create a column. Articles matching these keywords will auto-refresh from the database.
+              </div>
+
+              {searchRules.length === 0 && (
+                <div className="text-center py-8 text-foreground-secondary">
+                  <Search className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No search rules yet</p>
+                  <p className="text-xs mt-1">Create search rules in the Search page</p>
+                </div>
+              )}
+
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {searchRules.map((rule) => (
+                  <button
+                    key={rule.id}
+                    onClick={() => setSelectedSearchRuleId(rule.id)}
+                    className={cn(
+                      'w-full p-3 rounded-lg border text-left transition-all',
+                      selectedSearchRuleId === rule.id
+                        ? 'border-accent bg-accent/10'
+                        : 'border-border hover:border-accent hover:bg-background-tertiary'
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        'w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0',
+                        selectedSearchRuleId === rule.id
+                          ? 'border-accent bg-accent'
+                          : 'border-border'
+                      )}>
+                        {selectedSearchRuleId === rule.id && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">{rule.name || rule.query}</div>
+                        <div className="text-xs text-foreground-secondary truncate">
+                          Keywords: {rule.keywords.slice(0, 3).join(', ')}{rule.keywords.length > 3 ? '...' : ''}
+                        </div>
+                        {rule.lastRunAt && (
+                          <div className="text-xs text-foreground-secondary">
+                            Last run: {new Date(rule.lastRunAt).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {selectedSearchRuleId && (
+                <div className="space-y-3 border-t border-border pt-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Column title</label>
+                    <input
+                      type="text"
+                      value={searchColumnTitle}
+                      onChange={(e) => setSearchColumnTitle(e.target.value)}
+                      placeholder="Enter column title"
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    />
+                  </div>
+                  <button
+                    onClick={() => void handleCreateSearchColumn()}
+                    className="w-full py-2.5 bg-accent hover:bg-accent-hover text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <CircleDot className="w-4 h-4" />
+                    Create Column from Search
+                  </button>
                 </div>
               )}
             </div>

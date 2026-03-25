@@ -30,10 +30,12 @@ export interface ColumnSettings {
 export interface Column {
   id: string;
   title: string;
-  type: 'single-feed' | 'category' | 'unified';
+  type: 'single-feed' | 'category' | 'unified' | 'list' | 'search';
   sources: FeedSource[];
   settings: ColumnSettings;
   width: number; // Column width in pixels
+  feedListId?: string;
+  searchRuleId?: string;
 }
 
 export interface FeedResponse {
@@ -53,4 +55,26 @@ export interface KeywordAlert {
   keyword: string;  // stored as entered; matching is case-insensitive
   color: string;    // hex color string, e.g. "#ff4444"
   enabled: boolean; // false = skip during matching but keep in list
+}
+
+export interface FeedList {
+  id: string;
+  name: string;
+  feedCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FeedListWithItems extends FeedList {
+  items: Array<FeedSource & { feedListItemId: string; position: number }>;
+}
+
+// Client-safe shape of a saved search rule. Mirrors SavedSearchRule from
+// search-repository without importing the server-only module in client components.
+export interface SearchRule {
+  id: string;
+  name: string;
+  query: string;
+  keywords: string[];
+  lastRunAt: string | null;
 }

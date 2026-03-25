@@ -76,7 +76,7 @@ function deduplicateArticles(articles: Article[]): Article[] {
     const url = article.link?.toLowerCase().trim();
     const normalizedTitle = normalizeTitle(article.title || '');
     return (url && seen.get(url) === article) ||
-           (!url && normalizedTitle && seenTitles.get(normalizedTitle) === article);
+      (!url && normalizedTitle && seenTitles.get(normalizedTitle) === article);
   });
 }
 
@@ -116,6 +116,35 @@ export function Column({ column, onArticleClick, selectedArticleId, refreshTrigg
   }, [setColumns, setSavedFeeds]);
 
   const fetchFeeds = useCallback(async () => {
+    // Handle 'list' and 'search' column types via the articles endpoint
+    if (column.type === 'list' || column.type === 'search') {
+      try {
+        const res = await fetch(`/api/deck/columns/${column.id}/articles`);
+        if (!res.ok) throw new Error('Failed to fetch articles');
+        const data = await res.json();
+
+        // Sort by date, newest first
+        const sortedArticles = (data as Article[]).sort(
+          (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
+        );
+
+        // Remove duplicates (by URL and title)
+        const uniqueArticles = deduplicateArticles(sortedArticles);
+
+        setArticles(uniqueArticles);
+        setColumnArticles(column.id, uniqueArticles);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load articles');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+      return;
+    }
+
+    // Legacy column types (single-feed, category, unified)
     if (column.sources.length === 0) {
       setArticles([]);
       setIsLoading(false);
@@ -158,7 +187,7 @@ export function Column({ column, onArticleClick, selectedArticleId, refreshTrigg
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [column.sources, column.id, setColumnArticles]);
+  }, [column.type, column.id, column.sources, setColumnArticles]);
 
   // Initial load / manual refresh trigger
   useEffect(() => {
@@ -243,7 +272,7 @@ export function Column({ column, onArticleClick, selectedArticleId, refreshTrigg
           </div>
           <h2 className="font-bold text-sm truncate">{column.title}</h2>
           <span className="text-xs text-foreground-secondary ml-2 whitespace-nowrap">
-            {column.sources.length} {column.sources.length === 1 ? 'feed' : 'feeds'}
+            {column.type === 'list' ? 'List' : column.type === 'search' ? 'Search' : `${column.sources.length} ${column.sources.length === 1 ? 'feed' : 'feeds'}`}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -286,8 +315,11 @@ export function Column({ column, onArticleClick, selectedArticleId, refreshTrigg
         ) : articles.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-foreground-secondary px-4">
             <p className="text-sm text-center">No articles found</p>
-            {column.sources.length === 0 && (
+            {column.sources.length === 0 && column.type !== 'list' && column.type !== 'search' && (
               <p className="text-xs mt-1">Add some feeds to this column</p>
+            )}
+            {(column.type === 'list' || column.type === 'search') && articles.length === 0 && (
+              <p className="text-xs mt-1">No articles yet</p>
             )}
           </div>
         ) : (

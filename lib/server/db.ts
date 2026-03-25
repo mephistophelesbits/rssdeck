@@ -247,16 +247,31 @@ function runMigrations(db: DatabaseSync) {
   // Check if we need to migrate columns to feed_lists
   const existingLists = db.prepare('SELECT COUNT(*) as count FROM feed_lists').get() as { count: number };
   if (existingLists.count === 0) {
-    // Check if there are columns with feeds to migrate
+    const now = new Date().toISOString();
+
+    // First, collect all feed IDs that are referenced in any column's sources_json
     const columnsWithFeeds = db.prepare(`
       SELECT id, title, type, sources_json
       FROM columns_state
       WHERE sources_json IS NOT NULL AND sources_json != '[]' AND sources_json != ''
     `).all() as Array<{ id: string; title: string; type: string; sources_json: string }>;
 
+    const allFeedIdsInColumns = new Set<string>();
+    for (const column of columnsWithFeeds) {
+      let sources: Array<{ id: string; url: string; title: string; siteUrl?: string; lastFetchedAt?: string; lastError?: string }> = [];
+      try {
+        sources = JSON.parse(column.sources_json);
+      } catch {
+        continue;
+      }
+      for (const source of sources) {
+        allFeedIdsInColumns.add(source.id);
+      }
+    }
+
+    // Migrate columns with feeds to feed_lists
     if (columnsWithFeeds.length > 0) {
       console.log(`[Migration] Found ${columnsWithFeeds.length} columns with feeds to migrate to feed_lists...`);
-      const now = new Date().toISOString();
 
       for (const column of columnsWithFeeds) {
         let sources: Array<{ id: string; url: string; title: string; siteUrl?: string; lastFetchedAt?: string; lastError?: string }> = [];
@@ -298,8 +313,37 @@ function runMigrations(db: DatabaseSync) {
           }
         }
       }
-      console.log('[Migration] Feed lists migration complete');
     }
+
+    // Also migrate any feeds in saved_feeds that aren't in any column
+    // These might be orphaned feeds from deleted columns or feeds added directly
+    const orphanedFeeds = db.prepare(`
+      SELECT id, url, title FROM saved_feeds
+      WHERE id NOT IN (SELECT DISTINCT value FROM columns_state, json_each(sources_json) WHERE sources_json != '[]')
+    `).all() as Array<{ id: string; url: string; title: string }>;
+
+    if (orphanedFeeds.length > 0) {
+      console.log(`[Migration] Found ${orphanedFeeds.length} orphaned feeds not in any column...`);
+
+      const listId = nanoid();
+      db.prepare('INSERT INTO feed_lists (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)')
+        .run(listId, 'Other Feeds', now, now);
+
+      console.log(`[Migration] Created list "Other Feeds" for orphaned feeds`);
+
+      for (let i = 0; i < orphanedFeeds.length; i++) {
+        const feed = orphanedFeeds[i];
+        try {
+          const itemId = nanoid();
+          db.prepare('INSERT INTO feed_list_items (id, list_id, feed_id, position, created_at) VALUES (?, ?, ?, ?, ?)')
+            .run(itemId, listId, feed.id, i, now);
+        } catch {
+          // Item might already exist
+        }
+      }
+    }
+
+    console.log('[Migration] Feed lists migration complete');
   }
 }
 

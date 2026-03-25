@@ -166,6 +166,35 @@ export function migrateColumnsToLists(db: DatabaseSync): MigrationStats {
     listsCreated++;
   }
 
+  // Also migrate any feeds in saved_feeds that aren't in any column
+  const orphanedFeeds = db.prepare(`
+    SELECT id, url, title FROM saved_feeds
+    WHERE id NOT IN (SELECT DISTINCT value FROM columns_state, json_each(sources_json) WHERE sources_json != '[]')
+  `).all() as Array<{ id: string; url: string; title: string }>;
+
+  if (orphanedFeeds.length > 0) {
+    console.log(`Found ${orphanedFeeds.length} orphaned feeds not in any column...`);
+
+    const listId = nanoid();
+    db.prepare('INSERT INTO feed_lists (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)')
+      .run(listId, 'Other Feeds', now, now);
+
+    console.log(`Created list "Other Feeds" for orphaned feeds`);
+
+    for (let i = 0; i < orphanedFeeds.length; i++) {
+      const feed = orphanedFeeds[i];
+      try {
+        const itemId = nanoid();
+        db.prepare('INSERT INTO feed_list_items (id, list_id, feed_id, position, created_at) VALUES (?, ?, ?, ?, ?)')
+          .run(itemId, listId, feed.id, i, now);
+        feedsAdded++;
+      } catch (e) {
+        console.log(`  Feed ${feed.url} already in list, skipping...`);
+      }
+    }
+    listsCreated++;
+  }
+
   console.log(`\nMigration complete!`);
   console.log(`  Lists created: ${listsCreated}`);
   console.log(`  Feeds added: ${feedsAdded}`);

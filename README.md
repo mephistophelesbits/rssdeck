@@ -18,7 +18,7 @@
 
 ---
 
-![IntelliDeck Dashboard](docs/light_dashboard.png)
+![IntelliDeck Dashboard](docs/intellideck-dashboard.png)
 
 ---
 

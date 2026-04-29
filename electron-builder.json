@@ -1,7 +1,7 @@
 {
-  "appId": "com.rssdeck.app",
-  "productName": "RSS Deck",
-  "copyright": "Copyright © 2026 Wong Kian Fong",
+  "appId": "com.intellideck.app",
+  "productName": "IntelliDeck",
+  "copyright": "Copyright © 2026 IntelliDeck",
   "directories": {
     "output": "dist-electron",
     "buildResources": "electron/icons"
@@ -9,13 +9,11 @@
   "files": [
     ".electron-dist/**/*",
     "!.electron-dist/**/*.test.js",
-    ".next/**/*",
-    "public/**/*",
-    "node_modules/**/*",
-    "package.json",
-    "next.config.ts",
-    "tsconfig.json"
+    ".next/standalone/**/*",
+    "package.json"
   ],
+  "npmRebuild": false,
+  "afterPack": "./afterPack.js",
   "extraResources": [
     {
       "from": "data",
@@ -35,13 +33,12 @@
     "darkModeSupport": true
   },
   "dmg": {
-    "title": "RSS Deck",
+    "title": "IntelliDeck",
     "backgroundColor": "#09090f",
     "window": {
       "width": 540,
       "height": 380
     }
   },
-  "asar": true,
-  "main": ".electron-dist/main.js"
+  "asar": true
 }

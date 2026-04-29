@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Column, FeedSource } from './types';
 import { DEFAULT_COLUMNS } from './default-deck';
+import { useArticlesStore } from './articles-store';
 
 export const DEFAULT_COLUMN_WIDTH = 350;
 export const MIN_COLUMN_WIDTH = 280;
@@ -31,13 +32,17 @@ export const useDeckStore = create<DeckState>()(
       columns: DEFAULT_COLUMNS,
       savedFeeds: [],
 
-      setColumns: (columns) =>
+      setColumns: (columns) => {
         set({
           columns: columns.map((column) => ({
             ...column,
             width: column.width || DEFAULT_COLUMN_WIDTH,
           })),
-        }),
+        });
+        // Evict article cache entries for columns that are no longer active,
+        // preventing stale UUID → column mappings from breaking the reading panel.
+        useArticlesStore.getState().cleanupStaleColumns(columns.map((c) => c.id));
+      },
 
       setSavedFeeds: (feeds) => set({ savedFeeds: feeds }),
 

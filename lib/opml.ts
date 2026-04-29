@@ -132,7 +132,7 @@ export function isValidOPML(xmlString: string): boolean {
 /**
  * Generate OPML XML from feeds
  */
-export function generateOPML(feeds: OPMLFeed[], title: string = 'RSS Deck Exports'): string {
+export function generateOPML(feeds: OPMLFeed[], title: string = 'IntelliDeck Exports'): string {
   const categories = new Map<string, OPMLFeed[]>();
 
   // Group feeds by category

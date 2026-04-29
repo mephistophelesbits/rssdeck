@@ -7,7 +7,7 @@ export function createTray(mainWindow: BrowserWindow, iconPath: string): Tray {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Show RSS Deck',
+      label: 'Show IntelliDeck',
       click: () => {
         mainWindow.show();
         mainWindow.focus();
@@ -19,12 +19,12 @@ export function createTray(mainWindow: BrowserWindow, iconPath: string): Tray {
     },
     { type: 'separator' },
     {
-      label: 'Quit RSS Deck',
+      label: 'Quit IntelliDeck',
       click: () => app.quit(),
     },
   ]);
 
-  tray.setToolTip('RSS Deck');
+  tray.setToolTip('IntelliDeck');
   tray.setContextMenu(contextMenu);
 
   tray.on('double-click', () => {

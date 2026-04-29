@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  
+  
+
+  
+  
+  <polygon points="37,37 50,5 50,37" fill="#FFA040"></polygon>
+  
+  <polygon points="50,37 50,5 63,37" fill="#FF6A00"></polygon>
+  
+  <polygon points="63,37 95,50 63,50" fill="#FF7820"></polygon>
+  
+  <polygon points="63,50 95,50 63,63" fill="#CC4E00"></polygon>
+  
+  <polygon points="63,63 50,95 50,63" fill="#B84400"></polygon>
+  
+  <polygon points="50,63 50,95 37,63" fill="#D55800"></polygon>
+  
+  <polygon points="37,63 5,50 37,50" fill="#E06200"></polygon>
+  
+  <polygon points="37,50 5,50 37,37" fill="#FF8C30"></polygon>
+
+  
+  <polygon points="37,37 63,37 50,50" fill="#FF9030"></polygon>
+  <polygon points="63,37 63,63 50,50" fill="#D96000"></polygon>
+  <polygon points="63,63 37,63 50,50" fill="#B84400"></polygon>
+  <polygon points="37,63 37,37 50,50" fill="#FF8030"></polygon>
+
+  
+  
+  <line x1="37" y1="37" x2="63" y2="37" stroke="rgba(0,0,0,0.13)" stroke-width="0.6"></line>
+  <line x1="63" y1="37" x2="63" y2="63" stroke="rgba(0,0,0,0.13)" stroke-width="0.6"></line>
+  <line x1="63" y1="63" x2="37" y2="63" stroke="rgba(0,0,0,0.13)" stroke-width="0.6"></line>
+  <line x1="37" y1="63" x2="37" y2="37" stroke="rgba(0,0,0,0.13)" stroke-width="0.6"></line>
+  
+  <line x1="50" y1="5" x2="50" y2="37" stroke="rgba(255,255,255,0.25)" stroke-width="0.5"></line>
+  <line x1="95" y1="50" x2="63" y2="50" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"></line>
+  <line x1="50" y1="95" x2="50" y2="63" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"></line>
+  <line x1="5" y1="50" x2="37" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"></line>
+  
+  <line x1="50" y1="50" x2="37" y2="37" stroke="rgba(0,0,0,0.18)" stroke-width="0.6"></line>
+  <line x1="50" y1="50" x2="63" y2="37" stroke="rgba(0,0,0,0.18)" stroke-width="0.6"></line>
+  <line x1="50" y1="50" x2="63" y2="63" stroke="rgba(0,0,0,0.18)" stroke-width="0.6"></line>
+  <line x1="50" y1="50" x2="37" y2="63" stroke="rgba(0,0,0,0.18)" stroke-width="0.6"></line>
+
+  
+  <path d="M58,42 L54.5,50 L58,58 L50,54.5 L42,58 L45.5,50 L42,42 L50,45.5 Z" fill="white" fill-opacity="0.95"></path>
+</svg>

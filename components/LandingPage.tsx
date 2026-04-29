@@ -180,18 +180,12 @@ export default function LandingPage() {
           text-decoration: none;
         }
 
-        .logo-icon {
-          color: var(--accent);
-          font-size: 28px;
-        }
-
-        .logo-text {
-          font-size: 20px;
-          font-weight: 900;
-          letter-spacing: -0.02em;
-          text-transform: uppercase;
-          color: var(--text-primary);
-        }
+        .dark-logo { display: block; }
+        .light-logo { display: none; }
+        html.dark .dark-logo { display: block; }
+        html.dark .light-logo { display: none; }
+        html:not(.dark) .dark-logo { display: none; }
+        html:not(.dark) .light-logo { display: block; }
 
         .logo-text span {
           color: var(--accent);
@@ -455,8 +449,8 @@ export default function LandingPage() {
       <nav>
         <div className="container nav-inner">
           <a className="logo" href="#">
-            <span className="material-symbols-outlined logo-icon">rss_feed</span>
-            <span className="logo-text">RSS<span>DECK</span></span>
+            <img src="/logo-dark.svg" alt="IntelliDeck" style={{ height: '36px', width: 'auto' }} className="dark-logo" />
+            <img src="/logo-light.svg" alt="IntelliDeck" style={{ height: '36px', width: 'auto' }} className="light-logo" />
             <span className="logo-badge">{t('landing.selfHosted')}</span>
           </a>
           <div className="nav-links">
@@ -493,7 +487,7 @@ export default function LandingPage() {
               <a className="btn-secondary" href="#deploy">
                 {t('landing.deployLocally')}
               </a>
-              <a className="btn-secondary" href="https://github.com/mephistophelesbits/rssdeck" target="_blank">
+              <a className="btn-secondary" href="https://github.com/mephistophelesbits/intellideck" target="_blank">
                 {t('landing.viewSource')}
               </a>
             </div>
@@ -505,7 +499,7 @@ export default function LandingPage() {
                   <div className="titlebar-dots">
                     <span></span><span></span><span></span>
                   </div>
-                  <div className="titlebar-url">rssdeck.vercel.app</div>
+                  <div className="titlebar-url">intellideck.vercel.app</div>
                   <span className="material-symbols-outlined text-green">lock</span>
                 </div>
                 <div className="screenshot-carousel" id="carousel">
@@ -560,14 +554,14 @@ export default function LandingPage() {
                   <div className="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/20"><span className="material-symbols-outlined">dns</span></div>
                   <div><h4 className="font-bold">{t('landing.homeServer')}</h4><p className="text-sm opacity-60">{t('landing.homeServerDesc')}</p></div>
                 </div>
-                <a href="https://hub.docker.com/r/kianfong/rssdeck" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold inline-block text-center mt-4">{t('landing.dockerHub')}</a>
+                <a href="https://hub.docker.com/r/kianfong/intellideck" className="bg-white text-slate-900 px-6 py-3 rounded-xl font-bold inline-block text-center mt-4">{t('landing.dockerHub')}</a>
               </div>
               <div className="bg-black/40 border border-white/10 rounded-2xl p-6 font-mono text-sm">
                 <div className="text-green text-xs font-bold mb-4 uppercase tracking-widest">{t('landing.selfHostCommand')}</div>
-                <div className="text-blue-400">docker pull kianfong/rssdeck:latest</div>
+                <div className="text-blue-400">docker pull kianfong/intellideck:latest</div>
                 <div className="text-teal-400 mt-2">docker run -d -p 3000:3000 \</div>
                 <div className="text-teal-400">  -v rss-data:/app/data \</div>
-                <div className="text-teal-400">  --name rssdeck kianfong/rssdeck</div>
+                <div className="text-teal-400">  --name intellideck kianfong/intellideck</div>
               </div>
             </div>
           </div>
@@ -578,8 +572,8 @@ export default function LandingPage() {
         <div className="container py-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2 font-black uppercase"><span className="material-symbols-outlined text-green">shield_person</span> RSS DECK</div>
           <div className="flex gap-8 text-xs font-medium opacity-50">
-            <a href="https://github.com/mephistophelesbits/rssdeck">{t('landing.github')}</a>
-            <a href="https://hub.docker.com/r/kianfong/rssdeck">{t('landing.docker')}</a>
+            <a href="https://github.com/mephistophelesbits/intellideck">{t('landing.github')}</a>
+            <a href="https://hub.docker.com/r/kianfong/intellideck">{t('landing.docker')}</a>
           </div>
           <div className="text-xs opacity-50">{t('landing.copyright')}</div>
         </div>

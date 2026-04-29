@@ -19,7 +19,7 @@ export function WorkspaceShell({ title, description, actions, children }: Worksp
           <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
             <div className="min-w-0">
               <div className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-foreground-secondary mb-3">
-                <span>RSS Deck</span>
+                <span>IntelliDeck</span>
                 <span>/</span>
                 <span className="text-foreground">{title}</span>
               </div>

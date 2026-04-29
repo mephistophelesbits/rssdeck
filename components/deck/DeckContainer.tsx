@@ -82,7 +82,6 @@ export function DeckContainer({ onAddColumn, onArticleClick, onCloseArticle, sel
 
   const sourceColumnId = selectedArticle ? articleToColumn.get(selectedArticle.id) : null;
 
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {

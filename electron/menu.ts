@@ -55,11 +55,11 @@ export function buildAppMenu(mainWindow: BrowserWindow): Menu {
       role: 'help',
       submenu: [
         {
-          label: 'RSS Deck on GitHub',
+          label: 'IntelliDeck on GitHub',
           click: () => shell.openExternal('https://github.com/mephistophelesbits/rssdeck'),
         },
         {
-          label: 'Reload RSS Deck',
+          label: 'Reload IntelliDeck',
           accelerator: 'CmdOrCtrl+R',
           click: () => mainWindow.webContents.reload(),
         },

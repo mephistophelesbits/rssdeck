@@ -254,7 +254,7 @@ export const useArticleCacheStore = create<ArticleCacheState>()(
         set((state) => compactCacheState(state)),
     }),
     {
-      name: 'rss-deck-article-cache',
+      name: 'intellideck-article-cache',
       version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => compactCacheState(state),

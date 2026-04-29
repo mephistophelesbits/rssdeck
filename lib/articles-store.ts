@@ -9,6 +9,7 @@ interface ArticlesState {
 
   setColumnArticles: (columnId: string, articles: Article[]) => void;
   removeColumnArticles: (columnId: string) => void;
+  cleanupStaleColumns: (activeColumnIds: string[]) => void;
   getColumnArticles: (columnId: string) => Article[];
   getColumnForArticle: (articleId: string) => string | undefined;
 }
@@ -52,6 +53,29 @@ export const useArticlesStore = create<ArticlesState>((set, get) => ({
       return {
         articlesByColumn: newArticlesByColumn,
         articleToColumn: newArticleToColumn
+      };
+    }),
+
+  cleanupStaleColumns: (activeColumnIds) =>
+    set((state) => {
+      const activeSet = new Set(activeColumnIds);
+      const newArticlesByColumn = new Map<string, Article[]>();
+      state.articlesByColumn.forEach((columnArticles, colId) => {
+        if (activeSet.has(colId)) {
+          newArticlesByColumn.set(colId, columnArticles);
+        }
+      });
+
+      const newArticleToColumn = new Map<string, string>();
+      newArticlesByColumn.forEach((columnArticles, colId) => {
+        columnArticles.forEach((article) => {
+          newArticleToColumn.set(article.id, colId);
+        });
+      });
+
+      return {
+        articlesByColumn: newArticlesByColumn,
+        articleToColumn: newArticleToColumn,
       };
     }),
 

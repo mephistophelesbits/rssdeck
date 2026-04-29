@@ -9,7 +9,7 @@ let database: DatabaseSync | null = null;
 
 function getDatabasePath() {
   // In Electron production, RSSDECK_DATA_DIR is set to app.getPath('userData')
-  // so the DB lives in ~/Library/Application Support/RSS Deck/ and survives updates.
+  // so the DB lives in ~/Library/Application Support/IntelliDeck/ and survives updates.
   // In dev / web-only mode it falls back to <cwd>/data/.
   const dataDir = process.env.RSSDECK_DATA_DIR
     ? path.join(process.env.RSSDECK_DATA_DIR, 'data')

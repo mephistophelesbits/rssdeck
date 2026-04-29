@@ -35,8 +35,14 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: 'RSS Deck - Curated Feeds',
-  description: 'A beautiful, organized way to read your favorite feeds.',
+  title: 'IntelliDeck – News Intelligence Agent',
+  description: 'Your intelligent news reader. Curate feeds, analyze trends, generate briefings.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+    ],
+  },
 };
 
 export default function RootLayout({

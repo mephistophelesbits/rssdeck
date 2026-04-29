@@ -50,7 +50,7 @@ export function spawnNextServer(appRoot: string, userDataDir?: string): ChildPro
       PORT: '3001',
       HOSTNAME: 'localhost',
       // Pass the Electron userData dir so the Next.js server writes the DB
-      // to ~/Library/Application Support/RSS Deck/ instead of inside the bundle
+      // to ~/Library/Application Support/IntelliDeck/ instead of inside the bundle
       ...(userDataDir ? { RSSDECK_DATA_DIR: userDataDir } : {}),
     },
     stdio: ['ignore', 'pipe', 'pipe'],

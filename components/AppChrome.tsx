@@ -46,9 +46,14 @@ export function AppChrome({ children, renderContent, onRefreshAll }: AppChromePr
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-background relative">
+      {/* Draggable title-bar strip for Electron — ignored in the browser */}
+      <div
+        className="w-full flex-shrink-0 bg-background-secondary"
+        style={{ height: '28px', WebkitAppRegion: 'drag' } as React.CSSProperties}
+      />
       <BriefingManager />
       <StockTicker />
-      <TopNavBar 
+      <TopNavBar
         pageActions={
           <>
             <button 

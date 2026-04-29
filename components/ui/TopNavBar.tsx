@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Rss, LayoutDashboard, Newspaper, Search, Bookmark, Moon, Sun, List } from 'lucide-react';
+import { IntelliDeckMark } from '@/components/ui/IntelliDeckMark';
 import { cn } from '@/lib/utils';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
 import { useSettingsStore } from '@/lib/settings-store';
@@ -78,10 +79,11 @@ export function TopNavBar({ pageActions }: TopNavBarProps) {
           }}
           className="flex items-center gap-2 group"
         >
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center group-hover:opacity-90 transition-opacity">
-            <Rss className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-lg tracking-tight">RSS Deck</span>
+          <IntelliDeckMark size={30} className="group-hover:opacity-90 transition-opacity flex-shrink-0" />
+          <span className="font-extrabold text-lg tracking-tight" style={{ letterSpacing: '-0.02em' }}>
+            <span style={{ color: '#001426' }} className="dark:text-white">Intelli</span>
+            <span style={{ color: '#FF6A00' }}>Deck</span>
+          </span>
         </Link>
       </div>
 

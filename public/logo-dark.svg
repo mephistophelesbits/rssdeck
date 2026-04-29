@@ -1,0 +1,20 @@
+<svg width="900" height="260" viewBox="0 0 900 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="900" height="260" rx="32" fill="#071A33"/>
+<g transform="translate(52 40) scale(1.05)">
+
+    <rect x="58" y="28" width="96" height="142" rx="20" fill="#94A3B8" opacity="0.72"/>
+    <rect x="36" y="16" width="104" height="154" rx="22" fill="#253B55" opacity="0.88"/>
+    <rect x="0" y="0" width="128" height="172" rx="26" fill="#071A33"/>
+    <rect x="30" y="42" width="36" height="36" rx="7" fill="#FF5A14"/>
+    <rect x="80" y="47" width="38" height="10" rx="5" fill="#FFFFFF" opacity="0.94"/>
+    <rect x="80" y="68" width="38" height="10" rx="5" fill="#FFFFFF" opacity="0.94"/>
+    <rect x="30" y="101" width="88" height="10" rx="5" fill="#FFFFFF" opacity="0.94"/>
+    <rect x="30" y="126" width="66" height="10" rx="5" fill="#FFFFFF" opacity="0.94"/>
+    <path d="M151 5C154 22 162 30 179 33C162 36 154 45 151 62C148 45 140 36 123 33C140 30 148 22 151 5Z" fill="#FF5A14"/>
+    <circle cx="181" cy="62" r="9" fill="#FF5A14"/>
+  
+</g>
+<text x="278" y="124" font-family="Inter, Satoshi, Manrope, Arial, sans-serif" font-size="78" font-weight="800" letter-spacing="-3.2" fill="#FFFFFF">RSS</text>
+<text x="425" y="124" font-family="Inter, Satoshi, Manrope, Arial, sans-serif" font-size="78" font-weight="800" letter-spacing="-3.2" fill="#FF5A14">Deck</text>
+<text x="282" y="174" font-family="Inter, Satoshi, Manrope, Arial, sans-serif" font-size="20" font-weight="650" letter-spacing="10" fill="#CBD5E1">NEWS INTELLIGENCE AGENT</text>
+</svg>

@@ -79,7 +79,7 @@ export default function LandingPage() {
                 <span className="material-symbols-outlined">dns</span>
                 Deploy Locally
               </a>
-              <a href="https://github.com/mephistophelesbits/rssdeck" target="_blank" className="w-full sm:w-auto px-8 py-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl font-bold text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+              <a href="https://github.com/mephistophelesbits/intellideck" target="_blank" className="w-full sm:w-auto px-8 py-3 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl font-bold text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
                 <span className="material-symbols-outlined">code</span>
                 View Source
               </a>
@@ -103,7 +103,7 @@ export default function LandingPage() {
                   <div className="pt-12 px-4 h-full">
                     <Image 
                       src="/Screenshot 2026-02-12 at 17.32.40.png" 
-                      alt="RSS Deck Dashboard" 
+                      alt="IntelliDeck Dashboard" 
                       fill
                       className="object-cover rounded-b-xl"
                     />
@@ -127,7 +127,7 @@ export default function LandingPage() {
                   Your Data Never <br/> Leaves Your Network
                 </h2>
                 <p className="text-lg text-slate-500 dark:text-slate-400">
-                  Unlike traditional readers that store your browsing habits in the cloud, RSS Deck is an air-tight vault. Your feeds, your articles, and your AI insights remain strictly on your own hardware.
+                  Unlike traditional readers that store your browsing habits in the cloud, IntelliDeck is an air-tight vault. Your feeds, your articles, and your AI insights remain strictly on your own hardware.
                 </p>
                 <ul className="space-y-4">
                   <li className="flex items-center gap-3">
@@ -265,7 +265,7 @@ export default function LandingPage() {
                 </div>
                 <div className="space-y-4">
                   <div className="text-slate-600"># Docker Pull (NAS/Server)</div>
-                  <div className="text-blue-400">docker pull kianfong/rssdeck:latest</div>
+                  <div className="text-blue-400">docker pull kianfong/intellideck:latest</div>
                   <div className="text-slate-600 pt-2"># Run Local Stack (includes Ollama)</div>
                   <div className="text-teal-400">docker-compose up -d</div>
                   <div className="pt-6 text-slate-600"># Network access</div>
@@ -307,12 +307,12 @@ export default function LandingPage() {
                 <span className="text-lg font-bold tracking-tight uppercase text-slate-900 dark:text-white">RSS DECK</span>
               </div>
               <div className="flex gap-8 text-xs text-slate-500 font-medium">
-                <a href="https://github.com/mephistophelesbits/rssdeck" className="hover:text-blue-500 transition-colors">GitHub Repo</a>
-                <a href="https://hub.docker.com/r/kianfong/rssdeck" className="hover:text-blue-500 transition-colors">Docker Hub</a>
-                <a href="https://rssdeck.vercel.app" className="hover:text-blue-500 transition-colors">Live Demo</a>
+                <a href="https://github.com/mephistophelesbits/intellideck" className="hover:text-blue-500 transition-colors">GitHub Repo</a>
+                <a href="https://hub.docker.com/r/kianfong/intellideck" className="hover:text-blue-500 transition-colors">Docker Hub</a>
+                <a href="https://intellideck.vercel.app" className="hover:text-blue-500 transition-colors">Live Demo</a>
               </div>
               <div className="text-xs text-slate-400">
-                © 2026 RSS Deck. Open Source & Privacy Focused.
+                © 2026 IntelliDeck. Open Source & Privacy Focused.
               </div>
             </div>
           </div>

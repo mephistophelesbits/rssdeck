@@ -116,7 +116,7 @@ export const useRSSDeckStore = create<RSSDeckState>()(
       setOpmlImportProgress: (progress) => set({ opmlImportProgress: progress }),
     }),
     {
-      name: 'rss-deck-extensions',
+      name: 'intellideck-extensions',
       version: 1,
     }
   )

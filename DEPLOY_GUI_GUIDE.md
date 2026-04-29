@@ -84,7 +84,7 @@ docker compose -f docker-compose.nas.yml up -d
 ### Gemini API Key
 After deployment, enter in IntelliDeck Settings:
 - **Provider**: Google Gemini
-- **API Key**: `AIzaSyA7C1YNdCradXz8osEEwV6tr8QF4upijsU`
+- **API Key**: your Gemini API key from https://aistudio.google.com/apikey
 
 ### Port
 Default port is **3005**. Change in docker-compose.nas.yml if needed:

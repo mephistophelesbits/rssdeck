@@ -188,7 +188,9 @@
     "importAsColumn": "Import as Column",
     "importAsMultipleColumns": "Import as Multiple Columns",
     "importHelp": "Choose to import all feeds into one column or create separate columns by category",
-    "pleaseEnterUrl": "Please enter a URL"
+    "pleaseEnterUrl": "Please enter a URL",
+    "fromList": "From List",
+    "searchRule": "Search Rule"
   },
   "addColumn": {
     "title": "Add Column",

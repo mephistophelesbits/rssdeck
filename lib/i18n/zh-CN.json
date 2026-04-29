@@ -188,7 +188,9 @@
     "importAsColumn": "导入为一列",
     "importAsMultipleColumns": "导入为多列",
     "importHelp": "选择将所有订阅源导入一列或按分类创建多列",
-    "pleaseEnterUrl": "请输入 URL"
+    "pleaseEnterUrl": "请输入 URL",
+    "fromList": "从列表",
+    "searchRule": "搜索规则"
   },
   "addColumn": {
     "title": "添加列",

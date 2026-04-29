@@ -15,7 +15,7 @@ function getDatabasePath() {
     ? path.join(process.env.RSSDECK_DATA_DIR, 'data')
     : path.join(process.cwd(), 'data');
   fs.mkdirSync(dataDir, { recursive: true });
-  return path.join(dataDir, 'rssdeck.db');
+  return path.join(dataDir, 'intellideck.db');
 }
 
 function initializeDatabase(db: DatabaseSync) {

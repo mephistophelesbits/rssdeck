@@ -1,13 +1,13 @@
-# RSS Deck — The AI-First RSS Reader
+# IntelliDeck — The AI-First RSS Reader
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow)](https://buymeacoffee.com/kianfongl)
-[![Docker Image](https://img.shields.io/badge/Docker-kianfong%2Frssdeck-blue)](https://hub.docker.com/r/kianfong/rssdeck)
+[![Docker Image](https://img.shields.io/badge/Docker-kianfong%2Fintellideck-blue)](https://hub.docker.com/r/kianfong/intellideck)
 
-![RSS Deck Light Theme](docs/light_dashboard.png)
+![IntelliDeck Light Theme](docs/light_dashboard.png)
 
 ---
 
-Remember TweetDeck? That feeling of having everything in view — your feeds laid out in columns, nothing hidden, nothing buried? RSS Deck brings that back. Except now there's an AI sitting alongside you, reading with you, summarizing for you, and alerting you to exactly what matters.
+Remember TweetDeck? That feeling of having everything in view — your feeds laid out in columns, nothing hidden, nothing buried? IntelliDeck brings that back. Except now there's an AI sitting alongside you, reading with you, summarizing for you, and alerting you to exactly what matters.
 
 This is not a reader with AI bolted on. The AI is the point.
 
@@ -21,7 +21,7 @@ Click any article to get an instant summary, or open a chat to go deeper. Ask it
 
 ## 🔔 Keyword Alerts
 
-Define the topics that matter to you — company names, technologies, people, anything. RSS Deck highlights matching articles across all your feeds in real time, so important stories never slip past even when you're not actively watching.
+Define the topics that matter to you — company names, technologies, people, anything. IntelliDeck highlights matching articles across all your feeds in real time, so important stories never slip past even when you're not actively watching.
 
 ## ☀️ Morning Briefing
 
@@ -38,7 +38,7 @@ Click an article and it opens as a dedicated column right next to the feed — w
 ### Docker (recommended)
 
 ```bash
-docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck kianfong/rssdeck:latest
+docker run -d -p 3000:3000 -v rss-data:/app/data --name intellideck kianfong/intellideck:latest
 ```
 
 > **Mac Apple Silicon users:** Build locally for native performance (see below).
@@ -46,8 +46,8 @@ docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck kianfong/rssdeck
 ### Docker Compose
 
 ```bash
-git clone https://github.com/mephistophelesbits/rssdeck.git
-cd rssdeck
+git clone https://github.com/mephistophelesbits/intellideck.git
+cd intellideck
 docker-compose up -d
 ```
 
@@ -56,8 +56,8 @@ Access at `http://localhost:3000`
 ### Local Development
 
 ```bash
-git clone https://github.com/mephistophelesbits/rssdeck.git
-cd rssdeck
+git clone https://github.com/mephistophelesbits/intellideck.git
+cd intellideck
 npm install
 npm run dev
 ```
@@ -68,16 +68,16 @@ npm run dev
 # Install from https://ollama.ai, then pull a model
 ollama pull llama3.2
 
-# RSS Deck auto-connects to Ollama at http://localhost:11434
+# IntelliDeck auto-connects to Ollama at http://localhost:11434
 ```
 
 ---
 
 ## The Story
 
-I built RSS Deck because I missed TweetDeck and wanted something modern — full article content, local AI, beautiful themes. The twist: I can't code. I built the entire thing through vibe coding with AI tools.
+I built IntelliDeck because I missed TweetDeck and wanted something modern — full article content, local AI, beautiful themes. The twist: I can't code. I built the entire thing through vibe coding with AI tools.
 
-RSS Deck is a project built with AI, powered by AI, for people who want to read with AI. That's not a coincidence.
+IntelliDeck is a project built with AI, powered by AI, for people who want to read with AI. That's not a coincidence.
 
 [Read the full story →](vibe_coding_journey.md)
 
@@ -109,19 +109,19 @@ RSS Deck is a project built with AI, powered by AI, for people who want to read 
 
 ---
 
-## 🦞 RSSdeck-MCP — For AI Agents
+## 🦞 IntelliDeck-MCP — For AI Agents
 
-Need to feed your AI agent a stream of curated news? **[RSSdeck-MCP](https://github.com/mephistophelesbits/rssdeck-mcp)** is a companion MCP server that wraps your RSS feeds in a token-efficient, agent-friendly format.
+Need to feed your AI agent a stream of curated news? **[IntelliDeck-MCP](https://github.com/mephistophelesbits/intellideck-mcp)** is a companion MCP server that wraps your RSS feeds in a token-efficient, agent-friendly format.
 
 - TL;DR summaries — not full articles
 - Relevance scoring and deduplication
 - Perfect for OpenClaw and other AI agents
 
 ```
-RSS Deck (Web UI) → Export OPML → RSSdeck-MCP → AI Agent
+IntelliDeck (Web UI) → Export OPML → IntelliDeck-MCP → AI Agent
 ```
 
-[Learn more →](https://github.com/mephistophelesbits/rssdeck-mcp)
+[Learn more →](https://github.com/mephistophelesbits/intellideck-mcp)
 
 ---
 
@@ -163,4 +163,4 @@ MIT — use it, fork it, ship it.
 
 **Built with AI, by [Wong Kian Fong](https://buymeacoffee.com/kianfongl)**
 
-If this project is useful to you, [give it a star](https://github.com/mephistophelesbits/rssdeck) or [buy me a coffee](https://buymeacoffee.com/kianfongl).
+If this project is useful to you, [give it a star](https://github.com/mephistophelesbits/intellideck) or [buy me a coffee](https://buymeacoffee.com/kianfongl).

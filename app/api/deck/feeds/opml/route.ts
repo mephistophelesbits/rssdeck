@@ -9,13 +9,13 @@ export async function GET() {
       title: feed.title,
       url: feed.url,
     })),
-    'RSS Deck Feed Export'
+    'IntelliDeck Feed Export'
   );
 
   return new NextResponse(body, {
     headers: {
       'Content-Type': 'text/x-opml; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="rssdeck-feeds.opml"',
+      'Content-Disposition': 'attachment; filename="intellideck-feeds.opml"',
     },
   });
 }

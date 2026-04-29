@@ -1,4 +1,4 @@
-# RSS Deck - Synology NAS Deployment Guide
+# IntelliDeck - Synology NAS Deployment Guide
 
 ## Prerequisites
 
@@ -12,16 +12,16 @@
 
 ### 1. Upload Files to NAS
 
-Upload the RSS Deck folder to your NAS, e.g.:
+Upload the IntelliDeck folder to your NAS, e.g.:
 ```
-/volume1/docker/rss-deck/
+/volume1/docker/intellideck/
 ```
 
 ### 2. SSH into NAS (recommended)
 
 ```bash
 ssh your_user@your_nas_ip
-cd /volume1/docker/rss-deck
+cd /volume1/docker/intellideck
 ```
 
 ### 3. Build and Run
@@ -37,7 +37,7 @@ docker compose -f docker-compose.nas.yml up -d
 docker ps
 ```
 
-### 4. Access RSS Deck
+### 4. Access IntelliDeck
 
 Open your browser:
 ```
@@ -50,7 +50,7 @@ http://your_nas_ip:3005
 
 ### 1. Prepare Files
 
-1. Copy RSS Deck folder to NAS (e.g., `/volume1/docker/rss-deck`)
+1. Copy IntelliDeck folder to NAS (e.g., `/volume1/docker/intellideck`)
 2. Make sure these files are present:
    - `docker-compose.nas.yml`
    - `Dockerfile`
@@ -61,7 +61,7 @@ http://your_nas_ip:3005
 
 1. Open **Container Manager** (or Docker) on Synology
 2. Go to **Project** → **Create**
-3. Select the RSS Deck folder
+3. Select the IntelliDeck folder
 4. Choose `docker-compose.nas.yml`
 5. Configure settings:
    - Network mode: Bridge
@@ -71,7 +71,7 @@ http://your_nas_ip:3005
 
 ### 3. Verify
 
-1. Check **Container** tab for `rss-deck` status
+1. Check **Container** tab for `intellideck` status
 2. Open browser: `http://nas_ip:3005`
 
 ---
@@ -92,7 +92,7 @@ The compose file already includes `TZ=Asia/Kuala_Lumpur`. Change if needed.
 
 ### Volume Persistence
 
-Settings are stored in Docker volume `rss-deck-data`:
+Settings are stored in Docker volume `intellideck-data`:
 - AI API keys
 - Briefing settings
 - Cache data
@@ -133,10 +133,10 @@ ssh your_user@your_nas_ip
 docker compose -f docker-compose.nas.yml up -d ollama
 
 # Install model (run this inside the container)
-docker exec -it rss-deck-ollama ollama pull llama3.2
+docker exec -it intellideck-ollama ollama pull llama3.2
 ```
 
-Then in RSS Deck Settings:
+Then in IntelliDeck Settings:
 - Provider: Ollama
 - URL: http://ollama:11434 (internal Docker network)
 - Model: llama3.2
@@ -174,7 +174,7 @@ docker compose -f docker-compose.nas.yml logs
 ### Backup Settings
 
 ```bash
-docker volume inspect rss-deck-data
+docker volume inspect intellideck-data
 # Settings are in the Mountpoint path
 ```
 
@@ -182,12 +182,12 @@ docker volume inspect rss-deck-data
 
 1. Export Docker image:
    ```bash
-   docker save rss-deck:latest > rss-deck.tar
+   docker save intellideck:latest > intellideck.tar
    ```
 2. Copy tar file and project files to new NAS
 3. Load and deploy:
    ```bash
-   docker load -i rss-deck.tar
+   docker load -i intellideck.tar
    ```
 
 ---
@@ -197,7 +197,7 @@ docker volume inspect rss-deck-data
 **Recommended: Use Synology QuickConnect**
 
 1. Enable QuickConnect in DSM Control Panel
-2. Access via: `http://quickconnect.to/your_id/rss-deck`
+2. Access via: `http://quickconnect.to/your_id/intellideck`
 
 **Alternative: Port Forward (Security Risk)**
 

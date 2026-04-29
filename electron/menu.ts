@@ -56,7 +56,7 @@ export function buildAppMenu(mainWindow: BrowserWindow): Menu {
       submenu: [
         {
           label: 'IntelliDeck on GitHub',
-          click: () => shell.openExternal('https://github.com/mephistophelesbits/rssdeck'),
+          click: () => shell.openExternal('https://github.com/mephistophelesbits/intellideck'),
         },
         {
           label: 'Reload IntelliDeck',

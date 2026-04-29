@@ -1,8 +1,8 @@
-# RSS Deck
+# IntelliDeck
 
-![RSS Deck Screenshot](https://raw.githubusercontent.com/mephistophelesbits/rssdeck/main/docs/screenshot.png)
+![IntelliDeck Screenshot](https://raw.githubusercontent.com/mephistophelesbits/intellideck/main/docs/screenshot.png)
 
-**RSS Deck** is a modern, privacy-first, multi-column RSS reader featuring a TweetDeck-style interface with deep local AI integration. Everything runs locally on your machine—no cloud subscriptions, no paywalls, no tracking.
+**IntelliDeck** is a modern, privacy-first, multi-column RSS reader featuring a TweetDeck-style interface with deep local AI integration. Everything runs locally on your machine—no cloud subscriptions, no paywalls, no tracking.
 
 ## ✨ Key Features
 
@@ -15,10 +15,10 @@
 
 ## 🚀 Quick Start (Docker)
 
-To run the latest version of RSS Deck, simply execute:
+To run the latest version of IntelliDeck, simply execute:
 
 ```bash
-docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck kianfong/rssdeck:latest
+docker run -d -p 3000:3000 -v rss-data:/app/data --name intellideck kianfong/intellideck:latest
 ```
 
 *Note: For Apple Silicon (M1/M2/M3) users, you may need to append `--platform linux/amd64` to the command, or build the image locally from source.*
@@ -29,21 +29,21 @@ docker run -d -p 3000:3000 -v rss-data:/app/data --name rssdeck kianfong/rssdeck
 version: '3.8'
 
 services:
-  rss-deck:
-    image: kianfong/rssdeck:latest
-    container_name: rss-deck
+  intellideck:
+    image: kianfong/intellideck:latest
+    container_name: intellideck
     ports:
       - "3000:3000"
     restart: unless-stopped
     volumes:
-      - rss-deck-data:/app/data
+      - intellideck-data:/app/data
 
 volumes:
-  rss-deck-data:
+  intellideck-data:
 ```
 
 ## 🧠 Connecting to Local AI (Ollama)
-For the AI features to work, you will need a running instance of [Ollama](https://ollama.ai/) accessible by the container. RSS Deck defaults to looking for Ollama at `http://localhost:11434`. 
+For the AI features to work, you will need a running instance of [Ollama](https://ollama.ai/) accessible by the container. IntelliDeck defaults to looking for Ollama at `http://localhost:11434`. 
 You can easily spin up Ollama locally and pull a model:
 ```bash
 ollama run llama3.2
@@ -51,5 +51,5 @@ ollama run llama3.2
 
 ## 🔗 Links
 
-- **GitHub Repository**: [mephistophelesbits/rssdeck](https://github.com/mephistophelesbits/rssdeck)
-- **Bug Tracker**: [Issues](https://github.com/mephistophelesbits/rssdeck/issues)
+- **GitHub Repository**: [mephistophelesbits/intellideck](https://github.com/mephistophelesbits/intellideck)
+- **Bug Tracker**: [Issues](https://github.com/mephistophelesbits/intellideck/issues)

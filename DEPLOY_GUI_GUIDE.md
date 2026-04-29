@@ -1,4 +1,4 @@
-# RSS Deck - Synology NAS Deployment Guide
+# IntelliDeck - Synology NAS Deployment Guide
 
 ## Current Status
 - **NAS IP**: 192.168.68.57
@@ -11,7 +11,7 @@
 ## Prerequisites
 
 1. **Synology NAS** with Docker installed (Container Manager app)
-2. Files synced via Synology Drive to: `/volume1/docker/rss-deck/`
+2. Files synced via Synology Drive to: `/volume1/docker/intellideck/`
 3. Access to Synology DSM web interface
 
 ---
@@ -42,10 +42,10 @@
 
 ## Step 3: Create Project
 
-1. **Project path**: Select `/volume1/docker/rss-deck/`
+1. **Project path**: Select `/volume1/docker/intellideck/`
 2. **Compose file**: Choose `docker-compose.nas.yml`
 3. **Configuration**:
-   - **Project name**: `rss-deck`
+   - **Project name**: `intellideck`
    - **Network mode**: Bridge
    - **Port mapping**: 3005:3000
    - **Enable auto-restart**: ✓
@@ -64,7 +64,7 @@ Container Manager will automatically:
 ```bash
 # SSH into NAS (enable first in DSM → Control Panel → Terminal & SNMP)
 ssh kianfong@192.168.68.57
-cd /volume1/docker/rss-deck
+cd /volume1/docker/intellideck
 docker compose -f docker-compose.nas.yml build
 docker compose -f docker-compose.nas.yml up -d
 ```
@@ -73,16 +73,16 @@ docker compose -f docker-compose.nas.yml up -d
 
 ## Step 5: Verify Deployment
 
-1. Check **Container** tab for `rss-deck` status (should be Running)
+1. Check **Container** tab for `intellideck` status (should be Running)
 2. Check **Logs** for any errors
-3. Access RSS Deck: `http://192.168.68.57:3005`
+3. Access IntelliDeck: `http://192.168.68.57:3005`
 
 ---
 
 ## Configuration Notes
 
 ### Gemini API Key
-After deployment, enter in RSS Deck Settings:
+After deployment, enter in IntelliDeck Settings:
 - **Provider**: Google Gemini
 - **API Key**: `AIzaSyA7C1YNdCradXz8osEEwV6tr8QF4upijsU`
 
@@ -97,15 +97,15 @@ ports:
 Already configured: `Asia/Kuala_Lumpur`
 
 ### Data Persistence
-Settings stored in Docker volume `rss-deck-data`
+Settings stored in Docker volume `intellideck-data`
 
 ---
 
 ## Management
 
 ### Via Docker GUI
-- **Start/Stop**: Container Manager → rss-deck → Actions
-- **Logs**: Container Manager → rss-deck → Logs
+- **Start/Stop**: Container Manager → intellideck → Actions
+- **Logs**: Container Manager → intellideck → Logs
 - **Restart**: Actions → Restart
 
 ### Via SSH (if enabled)
@@ -148,8 +148,8 @@ docker compose -f docker-compose.nas.yml up -d
 ---
 
 ## Success Criteria
-- [ ] Container `rss-deck` shows Running status
-- [ ] RSS Deck loads at `http://192.168.68.57:3005`
+- [ ] Container `intellideck` shows Running status
+- [ ] IntelliDeck loads at `http://192.168.68.57:3005`
 - [ ] Settings persist after container restart
 
 ---

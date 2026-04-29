@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const opml = `<?xml version="1.0" encoding="UTF-8"?>
 <opml version="2.0">
   <head>
-    <title>RSS Deck - Exported Feeds</title>
+    <title>IntelliDeck - Exported Feeds</title>
   </head>
   <body>
 ${feeds.map((feed: any) => `    <outline text="${feed.name}" title="${feed.name}" type="rss" xmlUrl="${feed.url}" htmlUrl=""/>`).join('\n')}
@@ -28,7 +28,7 @@ ${feeds.map((feed: any) => `    <outline text="${feed.name}" title="${feed.name}
     return new NextResponse(opml, {
       headers: {
         'Content-Type': 'application/xml',
-        'Content-Disposition': 'attachment; filename="rssdeck-feeds.opml"',
+        'Content-Disposition': 'attachment; filename="intellideck-feeds.opml"',
       },
     });
   } catch (error) {

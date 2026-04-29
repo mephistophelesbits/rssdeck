@@ -204,7 +204,7 @@ export function migrateColumnsToLists(db: DatabaseSync): MigrationStats {
 
 // Run migration if executed directly (not imported as module)
 if (require.main === module) {
-  const dbPath = path.join(process.cwd(), 'data', 'rssdeck.db');
+  const dbPath = path.join(process.cwd(), 'data', 'intellideck.db');
   const db = new DatabaseSync(dbPath);
   migrateColumnsToLists(db);
 }

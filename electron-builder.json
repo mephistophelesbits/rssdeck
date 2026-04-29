@@ -1,0 +1,47 @@
+{
+  "appId": "com.rssdeck.app",
+  "productName": "RSS Deck",
+  "copyright": "Copyright © 2026 Wong Kian Fong",
+  "directories": {
+    "output": "dist-electron",
+    "buildResources": "electron/icons"
+  },
+  "files": [
+    ".electron-dist/**/*",
+    "!.electron-dist/**/*.test.js",
+    ".next/**/*",
+    "public/**/*",
+    "node_modules/**/*",
+    "package.json",
+    "next.config.ts",
+    "tsconfig.json"
+  ],
+  "extraResources": [
+    {
+      "from": "data",
+      "to": "app/data",
+      "filter": ["**/*"]
+    }
+  ],
+  "mac": {
+    "category": "public.app-category.news",
+    "icon": "electron/icons/icon.icns",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["arm64", "x64"]
+      }
+    ],
+    "darkModeSupport": true
+  },
+  "dmg": {
+    "title": "RSS Deck",
+    "backgroundColor": "#09090f",
+    "window": {
+      "width": 540,
+      "height": 380
+    }
+  },
+  "asar": true,
+  "main": ".electron-dist/main.js"
+}

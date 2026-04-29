@@ -24,13 +24,30 @@ export async function waitForServer(
 
 export function spawnNextServer(appRoot: string): ChildProcess {
   const isDev = process.env.ELECTRON_IS_DEV === '1';
-  const nodeArgs = isDev
-    ? ['node_modules/.bin/next', 'dev', '-p', '3001']
-    : ['node_modules/.bin/next', 'start', '-p', '3001'];
 
-  const serverProcess = spawn(process.execPath, nodeArgs, {
-    cwd: appRoot,
-    env: { ...process.env, NODE_ENV: isDev ? 'development' : 'production' },
+  let command: string;
+  let args: string[];
+  let cwd: string;
+
+  if (isDev) {
+    command = process.execPath;
+    args = [path.join(appRoot, 'node_modules/.bin/next'), 'dev', '-p', '3001'];
+    cwd = appRoot;
+  } else {
+    // In production, use the standalone server built by next build
+    command = process.execPath;
+    args = [path.join(appRoot, '.next/standalone/server.js')];
+    cwd = appRoot;
+  }
+
+  const serverProcess = spawn(command, args, {
+    cwd,
+    env: {
+      ...process.env,
+      NODE_ENV: isDev ? 'development' : 'production',
+      PORT: '3001',
+      HOSTNAME: 'localhost',
+    },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 

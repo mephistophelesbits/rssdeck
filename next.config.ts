@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   // .next/standalone/.claude/worktrees/<id>/server.js instead of
   // .next/standalone/server.js.
   outputFileTracingRoot: path.resolve(__dirname),
+  // Exclude build-time directories that file tracing incorrectly pulls in.
+  outputFileTracingExcludes: {
+    '*': [
+      'dist-electron/**',
+      'electron/**',
+      '.electron-dist/**',
+      'data/**',
+      'docs/**',
+    ],
+  },
 };
 
 export default nextConfig;

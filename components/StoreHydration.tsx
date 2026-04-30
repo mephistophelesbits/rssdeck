@@ -5,6 +5,7 @@ import { fetchDeckState } from '@/lib/deck-client';
 import { useDeckStore } from '@/lib/store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
+import { useReadArticlesStore } from '@/lib/read-articles-store';
 
 interface StoreHydrationProps {
   children: React.ReactNode;
@@ -16,25 +17,29 @@ export function StoreHydration({ children }: StoreHydrationProps) {
   const setSavedFeeds = useDeckStore((state) => state.setSavedFeeds);
   const hydrateSettings = useSettingsStore((state) => state.hydrateSettings);
   const hydrateBookmarks = useBookmarksStore((state) => state.hydrateBookmarks);
+  const hydrateReadIds = useReadArticlesStore((state) => state.hydrateReadIds);
 
   useEffect(() => {
     let cancelled = false;
 
     const hydrate = async () => {
       try {
-        const [deckState, settingsResponse, bookmarksResponse] = await Promise.all([
+        const [deckState, settingsResponse, bookmarksResponse, readIdsResponse] = await Promise.all([
           fetchDeckState(),
           fetch('/api/settings', { cache: 'no-store' }),
           fetch('/api/bookmarks', { cache: 'no-store' }),
+          fetch('/api/articles/read', { cache: 'no-store' }),
         ]);
 
         const settings = await settingsResponse.json();
         const bookmarks = await bookmarksResponse.json();
+        const readIdsData = await readIdsResponse.json() as { readIds: string[] };
         if (!cancelled) {
           setColumns(deckState.columns);
           setSavedFeeds(deckState.savedFeeds);
           hydrateSettings(settings);
           hydrateBookmarks(bookmarks);
+          hydrateReadIds(readIdsData.readIds);
         }
       } catch (error) {
         console.error('Failed to hydrate deck state:', error);
@@ -50,7 +55,7 @@ export function StoreHydration({ children }: StoreHydrationProps) {
     return () => {
       cancelled = true;
     };
-  }, [hydrateBookmarks, hydrateSettings, setColumns, setSavedFeeds]);
+  }, [hydrateBookmarks, hydrateSettings, setColumns, setSavedFeeds, hydrateReadIds]);
 
   if (!isHydrated) {
     // Show loading state during SSR and initial hydration

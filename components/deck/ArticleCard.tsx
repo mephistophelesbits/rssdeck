@@ -3,6 +3,7 @@ import { Bookmark, Sparkles, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Article } from '@/lib/types';
 import { useBookmarksStore } from '@/lib/bookmarks-store';
+import { useReadArticlesStore } from '@/lib/read-articles-store';
 import { useSettingsStore } from '@/lib/settings-store';
 import { TimeAgo } from '@/components/ui/TimeAgo';
 import { cn, decodeHtml } from '@/lib/utils';
@@ -22,6 +23,8 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
   const { t } = useTranslation();
   const { isBookmarked, toggleBookmark } = useBookmarksStore();
   const bookmarked = isBookmarked(article.id);
+  const { isRead, markRead } = useReadArticlesStore();
+  const read = isRead(article.id);
   const { aiSettings, keywordAlerts } = useSettingsStore();
   const matchedAlert = keywordAlerts
     .filter(a => a.enabled)
@@ -89,11 +92,15 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
 
   return (
     <button
-      onClick={() => onClick(article)}
+      onClick={() => {
+        markRead(article.id);
+        onClick(article);
+      }}
       className={cn(
         'w-full text-left p-3 border-b border-border hover:bg-background-tertiary transition-colors group relative article-card',
         viewMode === 'compact' && 'py-2',
-        isSelected && 'bg-accent/20 border-l-2 border-l-accent'
+        isSelected && 'bg-accent/20 border-l-2 border-l-accent',
+        read && 'opacity-50 hover:opacity-100'
       )}
     >
       <div className="flex gap-3">
@@ -111,11 +118,15 @@ export function ArticleCard({ article, viewMode = 'comfortable', onClick, isSele
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
-
+            {!read && (
+              <span className="mt-1.5 w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+            )}
             <h3
               className={cn(
-                'font-medium transition-colors line-clamp-2 flex-1',
-                !matchedAlert && 'text-foreground group-hover:text-accent',
+                'transition-colors line-clamp-2 flex-1',
+                read ? 'font-normal text-foreground-secondary' : 'font-medium',
+                !matchedAlert && !read && 'text-foreground group-hover:text-accent',
+                !matchedAlert && read && 'text-foreground-secondary',
                 viewMode === 'compact' ? 'text-sm' : 'text-base'
               )}
               style={matchedAlert ? { color: matchedAlert.color } : undefined}

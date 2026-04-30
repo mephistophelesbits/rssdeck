@@ -213,6 +213,11 @@ function initializeDatabase(db: DatabaseSync) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS read_articles (
+      article_id TEXT PRIMARY KEY,
+      read_at    TEXT NOT NULL
+    );
+
     CREATE UNIQUE INDEX IF NOT EXISTS idx_feed_list_items_list_feed
       ON feed_list_items(list_id, feed_id);
 

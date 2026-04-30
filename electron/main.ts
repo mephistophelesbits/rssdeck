@@ -67,10 +67,9 @@ let serverReady = false; // guards activate handler during initial server startu
 
 function getAppRoot(): string {
   if (IS_DEV) return process.cwd();
-  // In production the Next.js standalone server is extracted from the ASAR
-  // via asarUnpack — utilityProcess.fork() needs a real filesystem path,
-  // not a virtual path inside app.asar.
-  return path.join((process as NodeJS.Process & { resourcesPath: string }).resourcesPath, 'app.asar.unpacked');
+  // In production all app files are real filesystem files (asar: false),
+  // so utilityProcess.fork() can find server.js at a real path.
+  return path.join((process as NodeJS.Process & { resourcesPath: string }).resourcesPath, 'app');
 }
 
 function getIconPath(): string {

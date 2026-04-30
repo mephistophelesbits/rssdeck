@@ -40,8 +40,5 @@
       "height": 380
     }
   },
-  "asar": true,
-  "asarUnpack": [
-    ".next/standalone/**/*"
-  ]
+  "asar": false
 }

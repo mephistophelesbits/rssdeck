@@ -78,3 +78,6 @@ export interface SearchRule {
   keywords: string[];
   lastRunAt: string | null;
 }
+
+export type AdSentinel = { type: 'ad'; id: string };
+export type FeedItem = Article | AdSentinel;

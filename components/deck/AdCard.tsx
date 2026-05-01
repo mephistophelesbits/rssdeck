@@ -2,9 +2,18 @@
 
 import { Coffee } from 'lucide-react';
 
+const BMAC_URL = 'https://buymeacoffee.com/kianfongl';
+
+type ElectronWindow = Window & { electronAPI?: { openExternal: (url: string) => void } };
+
 export function AdCard() {
   const handleClick = () => {
-    window.open('https://buymeacoffee.com/kianfongl', '_blank', 'noopener,noreferrer');
+    const electronAPI = (window as ElectronWindow).electronAPI;
+    if (electronAPI) {
+      electronAPI.openExternal(BMAC_URL);
+    } else {
+      window.open(BMAC_URL, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -15,8 +24,9 @@ export function AdCard() {
           <p className="text-sm text-foreground">
             Like IntelliDeck?{' '}
             <button
+              type="button"
               onClick={handleClick}
-              className="text-accent hover:underline font-medium"
+              className="text-accent hover:underline font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
             >
               Buy Fong a coffee.
             </button>

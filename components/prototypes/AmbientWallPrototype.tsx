@@ -31,44 +31,40 @@ type AmbientCard = {
   trend: string;
   accent: string;
   url?: string;
+  publishedAt?: string | null;
+  feedContent?: string | null;
+  contentSnippet?: string | null;
   origin?: 'real' | 'mock' | 'live';
 };
 
-type OverviewArticle = {
+type AmbientFeedArticle = {
   id: string;
   title: string;
   url: string;
+  originalPublishedAt: string | null;
   publishedAt: string | null;
   sourceTitle: string | null;
-  importanceScore?: number;
+  sourceUrl: string | null;
+  contentSnippet: string | null;
+  content: string | null;
 };
 
-type OverviewStoryline = {
-  id: string;
+type AmbientFeedResponse = {
+  items: AmbientFeedArticle[];
+  totalFeeds: number;
+  successfulFeeds: number;
+  failedFeeds: number;
+  refreshedAt: string;
+};
+
+type ScrapedArticle = {
   title: string;
-  category: string;
-  anchorEntity: string | null;
-  anchorTheme: string | null;
-  storyCount: number;
-  sourceCount: number;
-  totalImportance: number;
-  articles: OverviewArticle[];
-};
-
-type IntelligenceOverview = {
-  totals: {
-    articleCount: number;
-    sourceCount: number;
-    lastIngestedAt: string | null;
-  };
-  feedHealth: {
-    totalFeeds: number;
-    healthyFeeds: number;
-    failingFeeds: number;
-    neverFetchedFeeds: number;
-  };
-  recentArticles: OverviewArticle[];
-  storylines: OverviewStoryline[];
+  content: string;
+  textContent: string;
+  excerpt: string;
+  byline: string | null;
+  siteName: string | null;
+  length: number;
 };
 
 const seedCards: AmbientCard[] = [
@@ -373,86 +369,107 @@ function urgencyFromScore(score: number): AmbientCard['urgency'] {
   return 'context';
 }
 
-function typeFromCategory(category: string): AmbientCard['type'] {
-  const normalized = category.toLowerCase();
+function typeFromArticle(article: AmbientFeedArticle): AmbientCard['type'] {
+  const normalized = `${article.title} ${article.sourceTitle ?? ''}`.toLowerCase();
   if (normalized.includes('ai')) return 'AI';
-  if (normalized.includes('market') || normalized.includes('business') || normalized.includes('energy')) return 'Market';
-  if (normalized.includes('tech') || normalized.includes('science')) return 'Product';
-  if (normalized.includes('world') || normalized.includes('politic')) return 'World';
-  if (normalized.includes('health')) return 'Signal';
+  if (
+    normalized.includes('market') ||
+    normalized.includes('stock') ||
+    normalized.includes('business') ||
+    normalized.includes('funding') ||
+    normalized.includes('earnings')
+  ) {
+    return 'Market';
+  }
+  if (
+    normalized.includes('tech') ||
+    normalized.includes('software') ||
+    normalized.includes('apple') ||
+    normalized.includes('google') ||
+    normalized.includes('github')
+  ) {
+    return 'Product';
+  }
+  if (
+    normalized.includes('world') ||
+    normalized.includes('policy') ||
+    normalized.includes('china') ||
+    normalized.includes('ukraine') ||
+    normalized.includes('election')
+  ) {
+    return 'World';
+  }
+  if (normalized.includes('outage') || normalized.includes('error') || normalized.includes('status')) return 'Ops';
   return 'Signal';
 }
 
-function scoreFromImportance(importance: number | undefined, fallback = 54) {
-  if (!Number.isFinite(importance)) return fallback;
-  return Math.max(42, Math.min(98, Math.round((importance ?? fallback) * 0.72)));
+function scoreFromRecency(minutesAgo: number, index: number) {
+  const recencyScore = minutesAgo < 30 ? 98 : minutesAgo < 120 ? 90 : minutesAgo < 360 ? 80 : minutesAgo < 1440 ? 70 : 56;
+  return Math.max(42, Math.min(98, recencyScore - Math.min(index, 18)));
 }
 
-function mapOverviewToCards(overview: IntelligenceOverview): AmbientCard[] {
-  const storylineCards = overview.storylines.slice(0, 10).map((storyline) => {
-    const lead = storyline.articles[0];
-    const leadScore = scoreFromImportance(lead?.importanceScore, 72);
-    const sourceLabel =
-      storyline.sourceCount > 1 ? `${storyline.sourceCount} sources` : lead?.sourceTitle || 'Intelligence';
-    const category = storyline.category || 'General';
-    const theme = storyline.anchorTheme || storyline.anchorEntity || category;
+function stripHtml(value: string | null | undefined) {
+  if (!value) return '';
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-    return {
-      id: `storyline-${storyline.id}`,
-      title: lead?.title || storyline.title,
-      source: sourceLabel,
-      type: typeFromCategory(category),
-      urgency: urgencyFromScore(leadScore),
-      summary: `${storyline.storyCount} related articles clustered around ${theme}.`,
-      details: `Top cluster: ${storyline.articles
-        .slice(0, 4)
-        .map((article) => article.title)
-        .join(' / ')}`,
-      score: leadScore,
-      minutesAgo: minutesSince(lead?.publishedAt ?? overview.totals.lastIngestedAt),
-      trend: `${storyline.storyCount} stories`,
-      accent: categoryColorMap[category] ?? '#38bdf8',
-      url: lead?.url,
-      origin: 'real' as const,
-    } satisfies AmbientCard;
-  });
+function excerptFromArticle(article: AmbientFeedArticle) {
+  const content = stripHtml(article.contentSnippet || article.content);
+  if (!content) return 'Fresh item from your saved feeds.';
+  return content.length > 180 ? `${content.slice(0, 177)}...` : content;
+}
 
-  const recentArticleCards = overview.recentArticles.slice(0, 12).map((article) => {
+function mapFeedToCards(feed: AmbientFeedResponse): AmbientCard[] {
+  const articleCards = feed.items.map((article, index) => {
     const ageMinutes = minutesSince(article.publishedAt);
-    const recencyBoost = ageMinutes < 180 ? 24 : ageMinutes < 1440 ? 14 : ageMinutes < 4320 ? 6 : 0;
-    const score = scoreFromImportance(article.importanceScore, 48 + recencyBoost);
+    const score = scoreFromRecency(ageMinutes, index);
+    const type = typeFromArticle(article);
 
     return {
       id: `article-${article.id}`,
       title: article.title,
-      source: article.sourceTitle || 'Recent article',
-      type: 'Signal',
+      source: article.sourceTitle || 'Saved feed',
+      type,
       urgency: urgencyFromScore(score),
-      summary: 'Recent item from your IntelliDeck feed, promoted by freshness and source context.',
-      details: `Published ${timeLabel(ageMinutes)} ago from ${article.sourceTitle || 'an unknown source'}.`,
+      summary: excerptFromArticle(article),
+      details: stripHtml(article.content || article.contentSnippet) || `Published ${timeLabel(ageMinutes)} ago from ${article.sourceTitle || 'a saved feed'}.`,
       score,
       minutesAgo: ageMinutes,
-      trend: 'Recent',
-      accent: '#14b8a6',
+      trend: 'Latest',
+      accent: type === 'AI' ? categoryColorMap.AI : type === 'Market' ? categoryColorMap.Markets : type === 'World' ? categoryColorMap.World : '#14b8a6',
       url: article.url,
+      publishedAt: article.publishedAt,
+      feedContent: article.content,
+      contentSnippet: article.contentSnippet,
       origin: 'real' as const,
     } satisfies AmbientCard;
   });
 
   const healthCards: AmbientCard[] =
-    overview.feedHealth.failingFeeds > 0
+    feed.failedFeeds > 0
       ? [
           {
             id: 'feed-health',
-            title: `${overview.feedHealth.failingFeeds} saved feeds need attention`,
+            title: `${feed.failedFeeds} saved feeds need attention`,
             source: 'IntelliDeck Ops',
             type: 'Ops',
-            urgency: 'important',
-            summary: `${overview.feedHealth.healthyFeeds} of ${overview.feedHealth.totalFeeds} feeds are healthy. Failed feeds may hide important cards.`,
+            urgency: 'context',
+            summary: `${feed.successfulFeeds} of ${feed.totalFeeds} feeds refreshed successfully. Failed feeds may hide important cards.`,
             details:
-              'This operational card is generated from the feed health summary in the intelligence overview endpoint.',
-            score: 84,
-            minutesAgo: minutesSince(overview.totals.lastIngestedAt),
+              'This operational card is generated from the latest Feed Wall refresh.',
+            score: 44,
+            minutesAgo: minutesSince(feed.refreshedAt),
             trend: 'Feed health',
             accent: '#f97316',
             origin: 'real',
@@ -460,14 +477,25 @@ function mapOverviewToCards(overview: IntelligenceOverview): AmbientCard[] {
         ]
       : [];
 
-  const deduped = new Map<string, AmbientCard>();
-  [...healthCards, ...storylineCards, ...recentArticleCards].forEach((card) => {
-    if (!deduped.has(card.title)) deduped.set(card.title, card);
-  });
+  return [...healthCards, ...articleCards].slice(0, 24);
+}
 
-  return [...deduped.values()]
-    .sort((a, b) => b.score - a.score || a.minutesAgo - b.minutesAgo)
-    .slice(0, 20);
+function paragraphsFromText(value: string) {
+  return value
+    .split(/\n{2,}|\r{2,}/)
+    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .slice(0, 16);
+}
+
+function isTweetUrl(value: string | undefined) {
+  if (!value) return false;
+  try {
+    const host = new URL(value).hostname.replace(/^www\./, '');
+    return host === 'twitter.com' || host === 'x.com';
+  } catch {
+    return false;
+  }
 }
 
 type AmbientWallPrototypeProps = {
@@ -485,8 +513,12 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => new Set());
   const [feedMode, setFeedMode] = useState<'loading' | 'real' | 'fallback'>('loading');
   const [lastLoadedAt, setLastLoadedAt] = useState<Date | null>(null);
+  const [scrapedByUrl, setScrapedByUrl] = useState<
+    Record<string, { status: 'loading' | 'success' | 'error'; article?: ScrapedArticle; error?: string }>
+  >({});
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const firstLoopRef = useRef<HTMLDivElement | null>(null);
+  const scrollAccumulatorRef = useRef(0);
   const interactionPauseTimerRef = useRef<number | null>(null);
 
   const selectedIndex = useMemo(
@@ -496,22 +528,22 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
   const selectedCard = selectedIndex >= 0 ? cards[selectedIndex] : null;
   const isMoving = !paused && !interactionPaused && !selectedCard;
 
-  const loadOverviewCards = useCallback(async () => {
+  const loadLatestFeedCards = useCallback(async () => {
     try {
-      const response = await fetch('/api/intelligence/overview?days=14', { cache: 'no-store' });
-      if (!response.ok) throw new Error(`Overview request failed: ${response.status}`);
-      const overview = (await response.json()) as IntelligenceOverview;
-      const overviewCards = mapOverviewToCards(overview);
-      if (overviewCards.length === 0) {
+      const response = await fetch('/api/ambient?limit=40', { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Feed Wall request failed: ${response.status}`);
+      const feed = (await response.json()) as AmbientFeedResponse;
+      const latestCards = mapFeedToCards(feed);
+      if (latestCards.length === 0) {
         setCards(seedCards);
         setFeedMode('fallback');
       } else {
-        setCards(overviewCards);
+        setCards(latestCards);
         setFeedMode('real');
       }
       setLastLoadedAt(new Date());
     } catch (error) {
-      console.error('Failed to load ambient overview cards:', error);
+      console.error('Failed to load latest Feed Wall cards:', error);
       setCards(seedCards);
       setFeedMode('fallback');
       setLastLoadedAt(new Date());
@@ -541,11 +573,12 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
       const scroller = scrollerRef.current;
       const firstLoop = firstLoopRef.current;
       if (scroller && firstLoop && isMoving) {
-        scroller.scrollTop += speed;
+        scrollAccumulatorRef.current += speed;
         const loopHeight = firstLoop.offsetHeight;
-        if (loopHeight > 0 && scroller.scrollTop >= loopHeight) {
-          scroller.scrollTop -= loopHeight;
+        if (loopHeight > 0 && scrollAccumulatorRef.current >= loopHeight) {
+          scrollAccumulatorRef.current -= loopHeight;
         }
+        scroller.scrollTop = scrollAccumulatorRef.current;
       }
       frame = requestAnimationFrame(step);
     };
@@ -555,10 +588,55 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
   }, [isMoving, speed, rankedCards.length]);
 
   useEffect(() => {
-    void loadOverviewCards();
-    const timer = window.setInterval(() => void loadOverviewCards(), 60000);
+    void loadLatestFeedCards();
+    const timer = window.setInterval(() => void loadLatestFeedCards(), 120000);
     return () => window.clearInterval(timer);
-  }, [loadOverviewCards]);
+  }, [loadLatestFeedCards]);
+
+  useEffect(() => {
+    if (!selectedCard?.url) return;
+    const url = selectedCard.url;
+    const existing = scrapedByUrl[url];
+    if (existing?.status === 'loading' || existing?.status === 'success') return;
+
+    const controller = new AbortController();
+    setScrapedByUrl((current) => ({
+      ...current,
+      [url]: { status: 'loading' },
+    }));
+
+    const endpoint = isTweetUrl(url) ? '/api/tweet' : '/api/scrape';
+
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        const article = data.article || data.tweet;
+        if (!response.ok || !article) {
+          throw new Error(data.error || 'Failed to load full content');
+        }
+        setScrapedByUrl((current) => ({
+          ...current,
+          [url]: { status: 'success', article: article as ScrapedArticle },
+        }));
+      })
+      .catch((error) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setScrapedByUrl((current) => ({
+          ...current,
+          [url]: {
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Failed to load full article',
+          },
+        }));
+      });
+
+    return () => controller.abort();
+  }, [scrapedByUrl, selectedCard]);
 
   useEffect(() => {
     if (selectedCard || feedMode === 'real') return;
@@ -612,15 +690,21 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
   };
 
   const resetFeed = () => {
-    void loadOverviewCards();
+    void loadLatestFeedCards();
     setLiveIndex(0);
     setReadIds(new Set());
     setPinnedIds(new Set());
+    scrollAccumulatorRef.current = 0;
     if (scrollerRef.current) scrollerRef.current.scrollTop = 0;
   };
 
   const pauseAfterManualScroll = () => {
     setInteractionPaused(true);
+    window.setTimeout(() => {
+      if (scrollerRef.current) {
+        scrollAccumulatorRef.current = scrollerRef.current.scrollTop;
+      }
+    }, 0);
     if (interactionPauseTimerRef.current) {
       window.clearTimeout(interactionPauseTimerRef.current);
     }
@@ -712,6 +796,14 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
     );
   };
 
+  const selectedScrape = selectedCard?.url ? scrapedByUrl[selectedCard.url] : undefined;
+  const selectedHeadline = selectedScrape?.article?.title || selectedCard?.title || '';
+  const selectedExcerpt = selectedScrape?.article?.excerpt || selectedCard?.summary || '';
+  const selectedFullText =
+    selectedScrape?.article?.textContent ||
+    stripHtml(selectedCard?.feedContent || selectedCard?.contentSnippet || selectedCard?.details);
+  const selectedParagraphs = paragraphsFromText(selectedFullText);
+
   return (
     <main className={cn('relative overflow-hidden bg-[#08090d] text-white', embedded ? 'h-full' : 'h-[100dvh]')}>
       <div className="absolute inset-x-0 top-0 z-20 border-b border-white/10 bg-[#08090d]/92 px-4 py-3 backdrop-blur md:px-6">
@@ -722,12 +814,12 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
             </div>
             <div className="min-w-0">
               <h1 className="truncate text-lg font-black tracking-normal text-white md:text-2xl">
-                Ambient Feed Wall
+                Feed Wall
               </h1>
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-normal text-white/46">
                 <span>{cards.length} cards</span>
                 <span className="h-1 w-1 rounded-full bg-white/25" />
-                <span>{feedMode === 'real' ? 'IntelliDeck feed' : feedMode === 'loading' ? 'Loading' : 'Prototype feed'}</span>
+                <span>{feedMode === 'real' ? 'Latest saved feeds' : feedMode === 'loading' ? 'Loading latest feeds' : 'Prototype feed'}</span>
                 <span className="h-1 w-1 rounded-full bg-white/25" />
                 <span>{isMoving ? 'Live scroll' : 'Paused'}</span>
                 {lastLoadedAt && (
@@ -870,15 +962,15 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
                   className="mb-5 h-1.5 w-28 rounded-full"
                   style={{ backgroundColor: selectedCard.accent }}
                 />
-                <h2 className="max-w-[12ch] break-words text-[clamp(3rem,8vw,9rem)] font-black leading-[0.9] tracking-normal text-white">
-                  {selectedCard.title}
+                <h2 className="max-w-[12ch] break-words text-[clamp(2.6rem,6.6vw,7.5rem)] font-black leading-[0.92] tracking-normal text-white">
+                  {selectedHeadline}
                 </h2>
                 <p className="mt-8 max-w-3xl text-[clamp(1.2rem,2vw,2rem)] leading-tight text-white/70">
-                  {selectedCard.summary}
+                  {selectedExcerpt}
                 </p>
               </section>
 
-              <aside className="border-t border-white/10 bg-white/[0.04] p-5 md:border-l md:border-t-0 md:p-6">
+              <aside className="overflow-y-auto border-t border-white/10 bg-white/[0.04] p-5 md:border-l md:border-t-0 md:p-6">
                 <div className="grid grid-cols-2 gap-3">
                   <Metric label="Score" value={selectedCard.score.toString()} />
                   <Metric label="Freshness" value={timeLabel(selectedCard.minutesAgo)} />
@@ -889,9 +981,28 @@ export function AmbientWallPrototype({ embedded = false }: AmbientWallPrototypeP
                 <div className="mt-8 space-y-4">
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-normal text-white/45">
                     <Sparkles className="h-4 w-4" />
-                    <span>Brief</span>
+                    <span>Full Content</span>
                   </div>
-                  <p className="text-lg leading-snug text-white/78">{selectedCard.details}</p>
+                  {selectedScrape?.status === 'loading' && (
+                    <p className="text-lg leading-snug text-white/62">Pulling full article content...</p>
+                  )}
+                  {selectedScrape?.status === 'error' && (
+                    <div className="space-y-3">
+                      <p className="text-sm font-bold uppercase tracking-normal text-rose-200">
+                        Scraper could not extract this page
+                      </p>
+                      <p className="text-sm leading-snug text-white/48">{selectedScrape.error}</p>
+                    </div>
+                  )}
+                  {selectedParagraphs.length > 0 ? (
+                    <div className="space-y-4 text-base leading-relaxed text-white/78">
+                      {selectedParagraphs.map((paragraph, index) => (
+                        <p key={`${selectedCard.id}-paragraph-${index}`}>{paragraph}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-lg leading-snug text-white/78">{selectedCard.details}</p>
+                  )}
                 </div>
               </aside>
             </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/server/db';
 import { runArticleSearch } from '@/lib/server/search-repository';
+import { normalizeFeedItemDate } from '@/lib/server/rss-ingestion';
 import Parser from 'rss-parser';
 import { Article } from '@/lib/types';
 
@@ -147,7 +148,14 @@ async function fetchArticlesFromFeeds(urls: string[]): Promise<Article[]> {
                             id: item.guid || item.link || `generated-${Date.now()}-${Math.random()}`,
                             title: item.title || 'Untitled',
                             link: item.link || '',
-                            pubDate: item.pubDate || item.isoDate || new Date().toISOString(),
+                            pubDate: normalizeFeedItemDate({
+                                link: item.link,
+                                guid: item.guid,
+                                pubDate: item.pubDate,
+                                isoDate: item.isoDate,
+                                feedUrl: fetchUrl,
+                                feedTitle: feed.title,
+                            }),
                             contentSnippet: item.contentSnippet?.slice(0, 300),
                             content: (itemRecord.contentEncoded as string) || item.content,
                             author: (itemRecord.dcCreator as string) || item.creator,
@@ -165,7 +173,14 @@ async function fetchArticlesFromFeeds(urls: string[]): Promise<Article[]> {
                             id: item.guid || item.link || `generated-${Date.now()}-${Math.random()}`,
                             title: item.title || 'Untitled',
                             link: item.link || '',
-                            pubDate: item.pubDate || item.isoDate || new Date().toISOString(),
+                            pubDate: normalizeFeedItemDate({
+                                link: item.link,
+                                guid: item.guid,
+                                pubDate: item.pubDate,
+                                isoDate: item.isoDate,
+                                feedUrl: fetchUrl,
+                                feedTitle: feed.title,
+                            }),
                             contentSnippet: item.contentSnippet?.slice(0, 300),
                             content: (itemRecord.contentEncoded as string) || item.content,
                             author: (itemRecord.dcCreator as string) || item.creator,
@@ -177,14 +192,13 @@ async function fetchArticlesFromFeeds(urls: string[]): Promise<Article[]> {
                 },
             ];
 
-            let lastError: Error | null = null;
             for (const attempt of attempts) {
                 try {
                     const articles = await attempt();
                     allArticles.push(...articles);
                     break;
-                } catch (error) {
-                    lastError = error instanceof Error ? error : new Error('Failed to parse feed');
+                } catch {
+                    continue;
                 }
             }
         } catch (error) {

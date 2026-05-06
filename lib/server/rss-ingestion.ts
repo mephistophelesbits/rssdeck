@@ -1,7 +1,7 @@
 import 'server-only';
 
 import Parser from 'rss-parser';
-import { Article, FeedResponse } from '@/lib/types';
+import { FeedResponse } from '@/lib/types';
 import { generateId } from '@/lib/utils';
 import { persistArticles } from '@/lib/server/articles-repository';
 import { listSavedFeeds, recordFeedFetchResult } from '@/lib/server/deck-repository';
@@ -51,7 +51,14 @@ async function parseFeedFromUrl(fetchUrl: string) {
             id: item.guid || item.link || generateId(),
             title: item.title || 'Untitled',
             link: item.link || '',
-            pubDate: item.pubDate || item.isoDate || new Date().toISOString(),
+            pubDate: normalizeFeedItemDate({
+              link: item.link,
+              guid: item.guid,
+              pubDate: item.pubDate,
+              isoDate: item.isoDate,
+              feedUrl: fetchUrl,
+              feedTitle: feed.title,
+            }),
             contentSnippet: item.contentSnippet?.slice(0, 300),
             content: (itemRecord.contentEncoded as string) || item.content,
             author: (itemRecord.dcCreator as string) || item.creator,
@@ -74,7 +81,14 @@ async function parseFeedFromUrl(fetchUrl: string) {
             id: item.guid || item.link || generateId(),
             title: item.title || 'Untitled',
             link: item.link || '',
-            pubDate: item.pubDate || item.isoDate || new Date().toISOString(),
+            pubDate: normalizeFeedItemDate({
+              link: item.link,
+              guid: item.guid,
+              pubDate: item.pubDate,
+              isoDate: item.isoDate,
+              feedUrl: fetchUrl,
+              feedTitle: feed.title,
+            }),
             contentSnippet: item.contentSnippet?.slice(0, 300),
             content: (itemRecord.contentEncoded as string) || item.content,
             author: (itemRecord.dcCreator as string) || item.creator,
@@ -105,6 +119,59 @@ function normalizeFeedUrl(url: string) {
     return url;
   }
   return `http://${url}`;
+}
+
+function extractTweetSnowflake(value: string | null | undefined) {
+  if (!value) return null;
+  const match = value.match(/(?:status|statuses)\/(\d{15,25})|(?:^|[^\d])(\d{15,25})(?:$|[^\d])/);
+  return match?.[1] || match?.[2] || null;
+}
+
+function dateFromTweetSnowflake(value: string | null | undefined) {
+  const snowflake = extractTweetSnowflake(value);
+  if (!snowflake) return null;
+
+  try {
+    const timestamp = (BigInt(snowflake) >> BigInt(22)) + BigInt('1288834974657');
+    const millis = Number(timestamp);
+    if (!Number.isFinite(millis)) return null;
+    const date = new Date(millis);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+function isTweetFeed(input: { link?: string; guid?: string; feedUrl?: string; feedTitle?: string }) {
+  const haystack = `${input.link ?? ''} ${input.guid ?? ''} ${input.feedUrl ?? ''} ${input.feedTitle ?? ''}`.toLowerCase();
+  return (
+    haystack.includes('twitter.com') ||
+    haystack.includes('x.com') ||
+    haystack.includes('/tweets/') ||
+    haystack.includes('tweet')
+  );
+}
+
+export function normalizeFeedItemDate(input: {
+  link?: string;
+  guid?: string;
+  pubDate?: string;
+  isoDate?: string;
+  feedUrl?: string;
+  feedTitle?: string;
+}) {
+  if (isTweetFeed(input)) {
+    const snowflakeDate = dateFromTweetSnowflake(input.link) || dateFromTweetSnowflake(input.guid);
+    if (snowflakeDate) return snowflakeDate;
+
+    const rawTweetDate = input.pubDate || input.isoDate;
+    const parsed = rawTweetDate ? Date.parse(rawTweetDate) : 0;
+    if (!parsed || parsed < Date.UTC(2022, 0, 1)) {
+      return new Date().toISOString();
+    }
+  }
+
+  return input.pubDate || input.isoDate || new Date().toISOString();
 }
 
 function extractThumbnail(item: Record<string, unknown>): string | undefined {
